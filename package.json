@@ -1,0 +1,118 @@
+{
+  "name": "mrxbet",
+  "version": "1.0.0",
+  "description": "This is a casino application",
+  "author": "mrxbet",
+  "private": true,
+  "homepage": "./",
+  "publicPath": "./",
+  "dependencies": {
+    "@electron/notarize": "^2.3.2",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/path-browserify": "^1.0.2",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.5",
+    "electron-fetch": "^1.9.1",
+    "electron-is-dev": "^3.0.1",
+    "electron-log": "^5.1.2",
+    "electron-push-receiver": "^2.1.3",
+    "electron-store": "^9.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-onesignal": "^3.0.1",
+    "react-scripts": "5.0.1",
+    "react-spinners": "^0.13.8",
+    "wait-on": "^7.2.0",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "electron": "^30.0.2",
+    "electron-builder": "^24.13.3",
+    "path-browserify": "^1.0.1"
+  },
+  "build": {
+    "appId": "com.devservices.mrxbet",
+    "files": [
+      "build/**/*",
+      "public/**/*",
+      "public/main.js",
+      "public/preload.js"
+    ],
+    "extraResources": [
+      {
+        "from": "images/",
+        "to": "images/",
+        "filter": [
+          "icon.ico",
+          "icon.icns"
+        ]
+      }
+    ],
+    "productName": "MrXbet",
+    "artifactName": "${productName}-${version}.${ext}",
+    "directories": {
+      "output": "dist/tmp"
+    },
+    "extraMetadata": {
+      "main": "build/main.js"
+    },
+    "win": {
+      "icon": "./images/icon.ico",
+      "certificateFile": "./resources/WinStore/mrxbet.pfx",
+      "certificatePassword": "mrxbet123",
+      "publisherName": "mrxbet"
+    },
+    "mac": {
+      "category": "public.app-category.business",
+      "icon": "./images/icon.icns",
+      "hardenedRuntime": true,
+      "identity": "patel kuldeep (G6G549CHCQ)",
+      "entitlements": "./installer/entitlements.mac.plist",
+      "entitlementsInherit": "./installer/entitlements.mac.plist",
+      "provisioningProfile": "./resources/MacStore/mrxbet.provisionprofile",
+      "asarUnpack": "**/*.node",
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "sign": false,
+      "title": "MrXbet ${version}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "afterSign": "public/notarize.js"
+  },
+  "main": "public/main.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "electron:serve": "concurrently -k \"cross-env BROWSER=none npm start\" \"npm run electron:start\"",
+    "electron:build": "npm run build && electron-builder -c.extraMetadata.main=build/main.js && node public/notarize.js",
+    "electron:start": "wait-on tcp:3000 && electron .",
+    "dist": "electron-builder"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
