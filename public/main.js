@@ -17,17 +17,23 @@ let forceQuit = false;
 const createWindow = async () => {
   const { default: isDev } = await import("electron-is-dev");
   mainWindow = new BrowserWindow({
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     width: 344,
     height: 788,
-    icon: path.join(__dirname, "images", "icon.ico"), // Change to your app's icon
+    icon: path.join(__dirname, "images", "icon.ico"),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
       preload: path.join(__dirname, "./preload.js"),
     },
   });
+  mainWindow.loadURL("http://localhost:3000");
 
+  // Example to change icon dynamically
+  mainWindow.on("ready-to-show", () => {
+    // Change the icon dynamically here
+    mainWindow.setIcon(path.join(__dirname, "images/platinum.ico")); // Set new icon
+  });
   const appUrl = isDev
     ? "http://localhost:3000"
     : `file://${path.join(__dirname, "../build/index.html")}`;

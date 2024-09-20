@@ -1,0 +1,102 @@
+/* Container styles */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #081009;
+  }
+  
+  /* Content container */
+  .content-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  
+  /* Title and subtitle */
+  .title {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    color: #fff;
+  }
+  
+  .sub-title {
+    font-size: 16px;
+    font-weight: 400;
+    text-align: center;
+    padding: 20px 25px;
+    color: #fff;
+  }
+  
+  /* Input view */
+  .input-view {
+    width: 100%;
+    padding: 0 40px;
+    margin-bottom: 15px;
+  }
+  
+  .input {
+    width: 100%;
+    height: 50px;
+    padding: 0 20px;
+    border-color: #000;
+    border-width: 1px;
+    border-radius: 7px;
+    color: #fff;
+    background-color: #19361a;
+    outline: none;
+  }
+  
+  /* Button */
+  .button-view {
+    width: 100%;
+    padding: 0 40px;
+  }
+  
+  .button {
+    width: 100%;
+    background-color: #32a624;
+    height: 45px;
+    border: none;
+    border-radius: 5px;
+    color: #000;
+    font-weight: bold;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+  
+  .button-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+  }
+  
+  /* Error message */
+  .error-text {
+    font-size: 14px;
+    color: red;
+  }
+  
+  /* Loader animation */
+  .loader {
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #32a624;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Keyframes */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  

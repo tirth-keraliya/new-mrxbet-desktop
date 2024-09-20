@@ -1,0 +1,52 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #000;
+  }
+  
+  .listWrap {
+    flex: 1;
+    position: relative;
+  }
+  
+  .loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .flatListStyles {
+    padding-top: 20px; /* Adjust as needed */
+    flex: 1;
+    background-color: #081009;
+  }
+  
+  .contentFlatList {
+    padding-top: 10px;
+    padding-bottom: 40px;
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 24px;
+    background-color: #081009;
+  }
+  
+  .item {
+    border-radius: 8px;
+    background-color: #fff;
+    overflow: hidden;
+    box-shadow: 0 4px 4.65px rgba(50, 166, 36, 0.3);
+    margin-bottom: 16px; /* Add spacing between items */
+  }
+  
+  .imgWrapper {
+    height: 200px;
+  }
+  
+  .imgWrap {
+    height: 100%;
+    width: 100%;
+    object-fit: cover; /* Ensure images cover the space */
+  }
+  
