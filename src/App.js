@@ -15,7 +15,7 @@ function App() {
   const [fcmToken, setFcmToken] = useState("");
 
   const fcm_server_key =
-    "AAAAwIHSyzk:APA91bH03vYWfNP78ZLB2NCPkw5lrPF9791k-uQFxYrfqjMqDkmq1yLuUzaXfJBAo0AtmFJEtLbMCwrsDmNoQGZORMrRebUG2ePwFJ8acwFTtW-vjlxyj7FxbcqtxO7oSpmzBoWVK7Lf";
+    "AAAAf1JvBWQ:APA91bH2X1qgtuYr_jb4eRqRAMOPjpp-j-jKgeEaQyByYkjs7T_-6uXTbc8cS4JbYE2PIZHMnIbb9CyCxSStn1wqyGww_7RX0S0tXQBmnQJqgxGJUKBHjSc3UdmYdj6UKjInqBpXL4tb";
 
   function subscribeTokenToTopic(token, topic) {
     fetch(
@@ -42,7 +42,6 @@ function App() {
         console.error(error);
       });
   }
-
   useEffect(() => {
     window.electron?.getFCMToken("getFCMToken", (_, token) => {
       setFcmToken(token);
@@ -53,14 +52,8 @@ function App() {
   // Conditional rendering based on loading state
   return (
     <>
-      {!loading ? (
-        <div className="center-wrap">
-          <ClipLoader size={35} color={"#123abc"} />
-          <p>Hang tight, we're getting things ready for you.</p>
-        </div>
-      ) : (
-        <AppNavigator /> // Render the AppNavigator for routing
-      )}
+      <div>{fcmToken}</div>
+      <AppNavigator />
     </>
   );
 }

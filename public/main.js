@@ -30,18 +30,38 @@ const createWindow = async () => {
   mainWindow.loadURL("http://localhost:3000");
 
   // Example to change icon dynamically
-  mainWindow.on("ready-to-show", () => {
-    // Change the icon dynamically here
-    mainWindow.setIcon(path.join(__dirname, "images/platinum.ico")); // Set new icon
-  });
+  // mainWindow.on("ready-to-show", () => {
+  //   // Change the icon dynamically here
+  //   mainWindow.setIcon(path.join(__dirname, "images/platinum.ico")); // Set new icon
+  // });
   const appUrl = isDev
-    ? "http://localhost:3000"
+    ? "http://localhost:3000" // Dev mode (React's development server)
     : `file://${path.join(__dirname, "../build/index.html")}`;
   mainWindow.loadURL(appUrl);
 
   setupPushReceiver(mainWindow.webContents);
 
   app.setAppUserModelId("MrxBet");
+
+  ipcMain.on("change-app-icon", (event, iconName) => {
+    let iconPath;
+
+    // Check platform and set the correct icon file type for macOS (.icns) or other platforms (.ico)
+    if (process.platform === "darwin") {
+      // For macOS, use .icns files
+      iconPath = path.join(__dirname, `images/${iconName}.icns`);
+    } else {
+      // For Windows/Linux, use .ico files
+      iconPath = path.join(__dirname, `images/${iconName}.ico`);
+    }
+
+    if (mainWindow) {
+      mainWindow.setIcon(iconPath); // Update the Electron app window icon dynamically
+    }
+  });
+  mainWindow.loadURL(appUrl).catch((err) => {
+    console.error("Failed to load URL:", err);
+  });
 
   ipcMain.on("send-notification", (event, arg) => {
     const notification = new Notification({

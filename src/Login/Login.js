@@ -30,6 +30,10 @@ export default function LoginScreen() {
       setLoading(false);
     }
   }, [email, navigate]);
+  //   const changeIcon = (iconName) => {
+  //     // Send the icon change request to Electron via the ipcRenderer
+  //     window.electronAPI.changeIcon(iconName);
+  //   };
 
   return (
     <div className="container">
@@ -58,6 +62,10 @@ export default function LoginScreen() {
             )}
           </button>
         </div>
+        {/* <div>
+          <button onClick={() => changeIcon("platinum")}>Platinum</button>
+          <button onClick={() => changeIcon("bronze")}>Bronze</button>
+        </div> */}
       </div>
     </div>
   );

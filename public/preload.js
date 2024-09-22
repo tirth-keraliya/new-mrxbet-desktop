@@ -3,7 +3,11 @@ const { contextBridge, ipcRenderer } = require("electron");
 // Expose functions to the renderer process
 contextBridge.exposeInMainWorld("electronAPI", {
   openLink: (url) => ipcRenderer.send("open-link", url),
+  // changeIcon: (iconName) => ipcRenderer.send("change-app-icon", iconName),
+  changeIcon: (iconName) => ipcRenderer.send("change-app-icon", iconName),
 });
+// contextBridge.exposeInMainWorld("electronAPI", {
+// });
 
 contextBridge.exposeInMainWorld("electron", {
   isElectron: true,
@@ -14,7 +18,7 @@ contextBridge.exposeInMainWorld("electron", {
 });
 
 // Start FCM service with your sender ID
-const senderId = "826811796281"; // Replace with your FCM sender ID
+const senderId = "424461130432"; // Replace with your FCM sender ID
 ipcRenderer.send("PUSH_RECEIVER:::START_NOTIFICATION_SERVICE", senderId);
 
 ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_SERVICE_STARTED", (_, token) => {

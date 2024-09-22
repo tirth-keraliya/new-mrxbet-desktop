@@ -19,10 +19,12 @@ const updateIconBasedOnLevel = async (levelName) => {
 
     switch (levelName) {
       case "Platinum":
-        currentIcon.href = "/path-to-platinum-icon.png"; // Update path to the icon
+        currentIcon.href = "/public/images/platinum.ico";
+        window.electronAPI.changeIcon("platinum");
         break;
       case "Silver":
-        currentIcon.href = "/path-to-silver-icon.png"; // Update path to the icon
+        currentIcon.href = "/public/images/bronze.ico";
+        window.electronAPI.changeIcon("bronze");
         break;
       default:
         break;
