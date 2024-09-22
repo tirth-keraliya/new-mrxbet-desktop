@@ -48,7 +48,18 @@ const SplashScreen = () => {
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+
+    // Listen for deep link events from Electron
+    window.electronAPI.onDeepLink((deepLink) => {
+      const url = new URL(deepLink);
+      const playerId = url.searchParams.get("playerId");
+      console.log(playerId, "playerrrriD");
+
+      if (playerId) {
+        navigate(`/home?playerId=${playerId}`, { replace: true });
+      }
+    });
+  }, [loadData, navigate]);
 
   return (
     <div className="splash-background">

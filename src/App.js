@@ -52,7 +52,6 @@ function App() {
   // Conditional rendering based on loading state
   return (
     <>
-      <div>{fcmToken}</div>
       <AppNavigator />
     </>
   );

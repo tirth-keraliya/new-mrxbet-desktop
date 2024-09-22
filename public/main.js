@@ -146,6 +146,27 @@ const setupIPC = async () => {
     event.sender.send("getFCMToken", token);
   });
 };
+// Handle Branch deep links
+app.on("second-instance", (event, commandLine) => {
+  if (mainWindow && commandLine.length >= 2) {
+    const deepLink = commandLine.find((arg) => arg.startsWith("mrxbet://"));
+    if (deepLink) {
+      mainWindow.webContents.send("deep-link", deepLink);
+    }
+  }
+});
+
+// Register protocol and handle deep links for Windows
+app.setAsDefaultProtocolClient("mrxbet");
+// Handle open-url event for macOS
+app.on("open-url", (event, url) => {
+  console.log("Deep link:", url);
+  event.preventDefault();
+  if (mainWindow) {
+    // Handle the deep link in the renderer process
+    mainWindow.webContents.send("deep-link", url);
+  }
+});
 
 const setupApp = async () => {
   await app.whenReady();
