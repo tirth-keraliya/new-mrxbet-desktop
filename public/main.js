@@ -46,17 +46,23 @@ const createWindow = async () => {
   ipcMain.on("change-app-icon", (event, iconName) => {
     let iconPath;
 
-    // Check platform and set the correct icon file type for macOS (.icns) or other platforms (.ico)
+    // For macOS, use .icns files and ensure correct path
     if (process.platform === "darwin") {
-      // For macOS, use .icns files
-      iconPath = path.join(__dirname, `images/${iconName}.icns`);
+      iconPath = path.join(app.getAppPath(), "build", `${iconName}.icns`);
+      // You can also use path.resolve for a more reliable path
+      iconPath = path.resolve(__dirname, `images/${iconName}.icns`);
     } else {
       // For Windows/Linux, use .ico files
       iconPath = path.join(__dirname, `images/${iconName}.ico`);
     }
 
+    // Check if the window exists and then set the icon dynamically
     if (mainWindow) {
-      mainWindow.setIcon(iconPath); // Update the Electron app window icon dynamically
+      try {
+        mainWindow.setIcon(iconPath); // Update the Electron app window icon
+      } catch (err) {
+        console.error(`Failed to set icon: ${err}`);
+      }
     }
   });
   mainWindow.loadURL(appUrl).catch((err) => {
