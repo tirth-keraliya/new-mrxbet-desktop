@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppScreens } from "../AppNavigation/AppScreens";
 import { getCurrentPlayer } from "../utils/localStorage";
@@ -8,24 +8,27 @@ import "./SplashScreen.css";
 const SplashScreen = () => {
   const navigate = useNavigate();
 
-  const checkUserLogin = useCallback(
-    async (fetchedPlayerId) => {
-      let screen = AppScreens.LoginScreen;
-      let playerId = await getCurrentPlayer();
+  const checkUserLogin = async (fetchedPlayerId) => {
+    let playerId = await getCurrentPlayer();
 
-      if (!playerId && fetchedPlayerId) {
-        const response = await getPlayerByPlayerID(fetchedPlayerId);
-        if (response) {
-          screen = AppScreens.HomeScreen;
-        }
-      } else if (playerId) {
-        screen = AppScreens.HomeScreen;
+    // If there's an existing player ID, navigate to HomeScreen immediately
+    if (playerId) {
+      navigate(AppScreens.HomeScreen, { replace: true });
+      return;
+    }
+
+    // If no player ID, check if a fetched player ID was provided
+    if (fetchedPlayerId) {
+      const response = await getPlayerByPlayerID(fetchedPlayerId);
+      if (response) {
+        navigate(AppScreens.HomeScreen, { replace: true });
+      } else {
+        navigate(AppScreens.LoginScreen, { replace: true });
       }
-
-      navigate(screen, { replace: true });
-    },
-    [navigate]
-  );
+    } else {
+      navigate(AppScreens.LoginScreen, { replace: true });
+    }
+  };
 
   useEffect(() => {
     const handleDeepLink = (deepLink) => {
@@ -33,7 +36,6 @@ const SplashScreen = () => {
         const queryString = deepLink.split("?")[1];
         const params = new URLSearchParams(queryString);
         const fetchedPlayerId = params.get("playerid");
-
         checkUserLogin(fetchedPlayerId);
       } else {
         checkUserLogin(null);
@@ -42,7 +44,10 @@ const SplashScreen = () => {
 
     // Listen for deep link events from Electron
     window.electronAPI.onDeepLink(handleDeepLink);
-  }, [checkUserLogin]);
+
+    // Call checkUserLogin immediately on mount to check for an existing player
+    checkUserLogin(null);
+  }, [navigate]);
 
   return (
     <div className="splash-background">
