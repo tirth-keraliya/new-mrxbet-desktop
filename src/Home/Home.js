@@ -7,11 +7,14 @@ import {
   getPlayerByPlayerID,
 } from "../services/UserServices";
 import { getCurrentPlayer } from "../utils/localStorage";
+import { useNavigate } from "react-router-dom";
+import { AppScreens } from "../AppNavigation/AppScreens";
 
 const HomeScreen = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPlayer, setCurrentPlayer] = useState();
+  const navigate = useNavigate();
 
   const loadData = useCallback(async () => {
     try {
@@ -20,8 +23,11 @@ const HomeScreen = () => {
       setCurrentPlayer(player);
       if (player?.email) {
         await getPlayerByEmail(player?.email);
-      } else {
+      } else if (player?.playerID) {
         await getPlayerByPlayerID(player?.playerID);
+      } else if (!player) {
+        let screen = AppScreens.LoginScreen;
+        navigate(screen, { replace: true });
       }
       const response = await getContentfulActiveURLS();
       setLoading(false);

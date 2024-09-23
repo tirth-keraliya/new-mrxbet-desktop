@@ -1,14 +1,57 @@
-import React, { useState, useCallback } from "react";
-import { getPlayerByEmail } from "../services/UserServices";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  getPlayerByEmail,
+  getPlayerByPlayerID,
+} from "../services/UserServices";
 import { isValidEmail } from "../utils/helper";
 import { useNavigate } from "react-router-dom"; // For navigation
 import "./login.css"; // Import the CSS file
+import { AppScreens } from "../AppNavigation/AppScreens";
+import { getCurrentPlayer } from "../utils/localStorage";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // React Router for navigation
+  const navigate = useNavigate();
+
+  const checkUserLogin = useCallback(
+    async (fetchedPlayerId) => {
+      setLoading(true);
+
+      let screen = AppScreens.LoginScreen;
+      let playerId = await getCurrentPlayer();
+
+      if (!playerId && fetchedPlayerId) {
+        const response = await getPlayerByPlayerID(fetchedPlayerId);
+        if (response) {
+          screen = AppScreens.HomeScreen;
+        }
+      } else if (playerId) {
+        screen = AppScreens.HomeScreen;
+      }
+      setLoading(false);
+
+      navigate(screen, { replace: true });
+    },
+    [navigate]
+  );
+
+  useEffect(() => {
+    const handleDeepLink = (deepLink) => {
+      if (deepLink.includes("playerid")) {
+        const queryString = deepLink.split("?")[1];
+        const params = new URLSearchParams(queryString);
+        const fetchedPlayerId = params.get("playerid");
+        checkUserLogin(fetchedPlayerId);
+      } else {
+        checkUserLogin(null);
+      }
+    };
+
+    // Listen for deep link events from Electron
+    window.electronAPI.onDeepLink(handleDeepLink);
+  }, [checkUserLogin]);
 
   const onPressLogin = useCallback(async () => {
     setError("");

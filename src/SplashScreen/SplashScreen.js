@@ -8,58 +8,41 @@ import "./SplashScreen.css";
 const SplashScreen = () => {
   const navigate = useNavigate();
 
-  const checkUserLogin = useCallback(async () => {
-    let screen = AppScreens.LoginScreen;
-    let PlayerId = await getCurrentPlayer(); // Use web storage logic
-    if (!PlayerId) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const playerId = urlParams.get("playerId");
-      if (playerId) {
-        const response = await getPlayerByPlayerID(playerId);
+  const checkUserLogin = useCallback(
+    async (fetchedPlayerId) => {
+      let screen = AppScreens.LoginScreen;
+      let playerId = await getCurrentPlayer();
+
+      if (!playerId && fetchedPlayerId) {
+        const response = await getPlayerByPlayerID(fetchedPlayerId);
         if (response) {
           screen = AppScreens.HomeScreen;
         }
-        navigate(screen, { replace: true });
-      } else {
-        navigate(screen, { replace: true });
+      } else if (playerId) {
+        screen = AppScreens.HomeScreen;
       }
-    } else {
-      screen = AppScreens.HomeScreen;
+
       navigate(screen, { replace: true });
-    }
-  }, [navigate]);
-
-  const loadData = useCallback(() => {
-    let isDeepLink = false;
-    const urlParams = new URLSearchParams(window.location.search);
-    const playerId = urlParams.get("playerId");
-
-    if (playerId) {
-      isDeepLink = true;
-      checkUserLogin();
-    }
-
-    setTimeout(() => {
-      if (!isDeepLink) {
-        checkUserLogin();
-      }
-    }, 600);
-  }, [checkUserLogin]);
+    },
+    [navigate]
+  );
 
   useEffect(() => {
-    loadData();
+    const handleDeepLink = (deepLink) => {
+      if (deepLink.includes("playerid")) {
+        const queryString = deepLink.split("?")[1];
+        const params = new URLSearchParams(queryString);
+        const fetchedPlayerId = params.get("playerid");
+
+        checkUserLogin(fetchedPlayerId);
+      } else {
+        checkUserLogin(null);
+      }
+    };
 
     // Listen for deep link events from Electron
-    window.electronAPI.onDeepLink((deepLink) => {
-      const url = new URL(deepLink);
-      const playerId = url.searchParams.get("playerId");
-      console.log(playerId, "playerrrriD");
-
-      if (playerId) {
-        navigate(`/home?playerId=${playerId}`, { replace: true });
-      }
-    });
-  }, [loadData, navigate]);
+    window.electronAPI.onDeepLink(handleDeepLink);
+  }, [checkUserLogin]);
 
   return (
     <div className="splash-background">
