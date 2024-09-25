@@ -40,6 +40,7 @@
     "files": [
       "build/**/*",
       "public/**/*",
+      "images/**/*",
       "public/main.js",
       "public/preload.js"
     ],
@@ -47,10 +48,7 @@
       {
         "from": "images/",
         "to": "images/",
-        "filter": [
-          "icon.ico",
-          "icon.icns"
-        ]
+        "filter": ["**/*"]
       }
     ],
     "productName": "MrXbet",
