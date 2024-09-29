@@ -2,12 +2,15 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background-color: #000;
+    background: linear-gradient(90deg,#0e1d10,#2b372d 50%,#0e1d10);
+    overflow: auto;
+    padding: 60px 16px;
   }
   
   .listWrap {
     flex: 1;
     position: relative;
+    height: 100%;
   }
   
   .loading {
@@ -18,9 +21,12 @@
   }
   
   .flatListStyles {
-    padding-top: 20px; /* Adjust as needed */
+    padding-left: 0;
     flex: 1;
-    background-color: #081009;
+    padding-bottom: 10px;
+  }
+  .wrapperlist{
+    /* padding: 80px 0px; */
   }
   
   .contentFlatList {
@@ -34,14 +40,15 @@
   
   .item {
     border-radius: 8px;
-    background-color: #fff;
     overflow: hidden;
-    box-shadow: 0 4px 4.65px rgba(50, 166, 36, 0.3);
     margin-bottom: 16px; /* Add spacing between items */
   }
   
   .imgWrapper {
     height: 200px;
+    overflow: hidden;
+    border-radius: 8px;
+
   }
   
   .imgWrap {
