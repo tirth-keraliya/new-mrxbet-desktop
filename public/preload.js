@@ -12,11 +12,31 @@ contextBridge.exposeInMainWorld("electronAPI", {
 // });
 
 contextBridge.exposeInMainWorld("electron", {
-  getFCMToken: (channel, callback) => ipcRenderer.once(channel, callback),
-  getAccessToken: (channel, callback) => ipcRenderer.once(channel, callback),
-  // Function to get the OAuth Bearer token
+  getFCMToken: (channel, callback) => ipcRenderer.on(channel, callback),
+  getAccessToken: (channel, callback) => ipcRenderer.on(channel, callback),
   getOAuthToken: (callback) => ipcRenderer.invoke("get-oauth-token").then(callback),
 });
+
+window.electron.getFCMToken('fcm-token-channel', (event, token) => {
+  window.electron.getOAuthToken('oauth-token-channel', (event, accessToken) => {
+    fetch(`https://iid.googleapis.com/iid/v1/${token}/rel/topics/news`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => {
+      if (response.ok) {
+        console.log(`Subscribed to topic`);
+      } else {
+        console.error('Error subscribing to topic:', response.statusText);
+      }
+    })
+    .catch(err => console.error('Fetch error:', err));
+  });
+});
+
 
 // Start FCM service with your sender ID
 const senderId = "1020073407571"; // Replace with your FCM sender ID

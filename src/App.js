@@ -16,29 +16,25 @@ function App() {
   const [accessToken, setAccessToken] = useState(""); // New state for OAuth 2.0 token
 
   function subscribeTokenToTopic(token, topic, bearerToken) {
-    fetch(
-      "https://iid.googleapis.com/iid/v1/" + token + "/rel/topics/" + topic,
-      {
-        method: "POST",
-        headers: new Headers({
-          Authorization: "Bearer " + bearerToken, // Use OAuth 2.0 token
-        }),
-      }
-    )
+    fetch(`https://iid.googleapis.com/iid/v1/${token}/rel/topics/${topic}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${bearerToken}`,
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
-        if (response.status < 200 || response.status >= 400) {
-          throw (
-            "Error subscribing to topic: " +
-            response.status +
-            " - " +
-            response.text()
-          );
+        if (response.ok) {
+          console.log(`Subscribed to topic: ${topic}`);
+        } else {
+          return response.text().then((errorText) => {
+            console.error(
+              `Error subscribing to topic: ${response.status} - ${errorText}`
+            );
+          });
         }
-        console.log('Subscribed to "' + topic + '"');
       })
-      .catch((error) => {
-        console.error(error);
-      });
+      .catch((err) => console.error("Fetch error:", err));
   }
 
   // function subscribeTokenToTopic(token, topic) {
@@ -66,14 +62,14 @@ function App() {
   //       console.error(error);
   //     });
   // }
-  
+
   useEffect(() => {
     window.electron?.getFCMToken("getFCMToken", (_, token) => {
       setFcmToken(token);
     });
 
     // Fetch the OAuth 2.0 access token from the backend (main.js)
-    window.electron?.getAccessToken("getAccessToken", (_, token) => {
+    window.electron?.getOAuthToken((token) => {
       setAccessToken(token);
     });
   }, []);

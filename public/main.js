@@ -9,11 +9,11 @@ const {
 } = require("electron");
 const path = require("path");
 const { setup: setupPushReceiver } = require("electron-push-receiver");
-const { google } = require("google-auth-library");
+const { google } = require("googleapis");
 
 // Load your Firebase service account key
 const SERVICE_ACCOUNT_KEY_PATH = path.join(__dirname, "service-account.json");
-
+console.log('SERVICE_ACCOUNT_KEY_PATH',SERVICE_ACCOUNT_KEY_PATH);
 let mainWindow;
 let tray;
 let forceQuit = false;
@@ -65,23 +65,38 @@ const createWindow = async () => {
 };
 
 // Function to generate OAuth 2.0 token
-async function getAccessToken() {
-  const auth = new google.auth.GoogleAuth({
-    keyFile: SERVICE_ACCOUNT_KEY_PATH, // Path to your service account key
-    scopes: ["https://www.googleapis.com/auth/cloud-platform"],
-  });
-
-  const client = await auth.getClient();
-  const accessTokenResponse = await client.getAccessToken();
-  return accessTokenResponse.token;
+async function getOAuthToken() {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      keyFile: SERVICE_ACCOUNT_KEY_PATH,
+      scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
+    });
+    console.log('Auth object initialized:', auth);  // Debugging
+    
+    const accessToken = await auth.getAccessToken();
+    console.log('Access token generated:', accessToken);  // Debugging
+    return accessToken;
+  } catch (error) {
+    console.error('Error in getOAuthToken:', error);
+    throw error;
+  }
 }
 // IPC listener to fetch OAuth 2.0 token
-ipcMain.on("getAccessToken", async (event) => {
+// ipcMain.on("getAccessToken", async (event) => {
+//   try {
+//     const token = await getAccessToken();
+//     event.sender.send("accessToken", token);
+//   } catch (error) {
+//     console.error("Error getting access token:", error);
+//   }
+// });
+ipcMain.handle('get-oauth-token', async () => {
   try {
-    const token = await getAccessToken();
-    event.sender.send("accessToken", token);
+    const token = await getOAuthToken();
+    return token;
   } catch (error) {
-    console.error("Error getting access token:", error);
+    console.error('Error fetching OAuth token:', error);
+    throw error;
   }
 });
 
