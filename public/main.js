@@ -9,6 +9,10 @@ const {
 } = require("electron");
 const path = require("path");
 const { setup: setupPushReceiver } = require("electron-push-receiver");
+const { google } = require("google-auth-library");
+
+// Load your Firebase service account key
+const SERVICE_ACCOUNT_KEY_PATH = path.join(__dirname, "service-account.json");
 
 let mainWindow;
 let tray;
@@ -59,6 +63,27 @@ const createWindow = async () => {
 
   return mainWindow;
 };
+
+// Function to generate OAuth 2.0 token
+async function getAccessToken() {
+  const auth = new google.auth.GoogleAuth({
+    keyFile: SERVICE_ACCOUNT_KEY_PATH, // Path to your service account key
+    scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+  });
+
+  const client = await auth.getClient();
+  const accessTokenResponse = await client.getAccessToken();
+  return accessTokenResponse.token;
+}
+// IPC listener to fetch OAuth 2.0 token
+ipcMain.on("getAccessToken", async (event) => {
+  try {
+    const token = await getAccessToken();
+    event.sender.send("accessToken", token);
+  } catch (error) {
+    console.error("Error getting access token:", error);
+  }
+});
 
 // Function to create the tray icon
 const createTray = (iconName = "icon") => {

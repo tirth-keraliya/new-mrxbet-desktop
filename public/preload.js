@@ -12,15 +12,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
 // });
 
 contextBridge.exposeInMainWorld("electron", {
-  isElectron: true,
-  getFCMToken: (channel, func) => {
-    ipcRenderer.once(channel, func);
-    ipcRenderer.send("getFCMToken");
-  },
+  getFCMToken: (channel, callback) => ipcRenderer.once(channel, callback),
+  getAccessToken: (channel, callback) => ipcRenderer.once(channel, callback),
+  // Function to get the OAuth Bearer token
+  getOAuthToken: (callback) => ipcRenderer.invoke("get-oauth-token").then(callback),
 });
 
 // Start FCM service with your sender ID
-const senderId = "541714057195"; // Replace with your FCM sender ID
+const senderId = "1020073407571"; // Replace with your FCM sender ID
 ipcRenderer.send("PUSH_RECEIVER:::START_NOTIFICATION_SERVICE", senderId);
 
 ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_SERVICE_STARTED", (_, token) => {
@@ -36,6 +35,7 @@ ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_RECEIVED", (_, notification) => {
 ipcRenderer.on("PUSH_RECEIVER:::TOKEN_UPDATED", (_, token) => {
   ipcRenderer.send("storeFCMToken", token);
 });
+
 const postMessage = (type, args) => {
   window.postMessage(
     JSON.stringify({
@@ -45,6 +45,7 @@ const postMessage = (type, args) => {
     "*"
   );
 };
+
 ipcRenderer.on("app-main-notification-clicked", (_, args) => {
   postMessage("app-notification-clicked", JSON.parse(args));
 });

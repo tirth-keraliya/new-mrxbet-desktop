@@ -13,17 +13,15 @@ function App() {
   const [splashBackgroundImage, setSplashBackgroundImage] =
     useState(Background);
   const [fcmToken, setFcmToken] = useState("");
+  const [accessToken, setAccessToken] = useState(""); // New state for OAuth 2.0 token
 
-  const fcm_server_key =
-    "AAAAf1JvBWQ:APA91bH2X1qgtuYr_jb4eRqRAMOPjpp-j-jKgeEaQyByYkjs7T_-6uXTbc8cS4JbYE2PIZHMnIbb9CyCxSStn1wqyGww_7RX0S0tXQBmnQJqgxGJUKBHjSc3UdmYdj6UKjInqBpXL4tb";
-
-  function subscribeTokenToTopic(token, topic) {
+  function subscribeTokenToTopic(token, topic, bearerToken) {
     fetch(
       "https://iid.googleapis.com/iid/v1/" + token + "/rel/topics/" + topic,
       {
         method: "POST",
         headers: new Headers({
-          Authorization: "key=" + fcm_server_key,
+          Authorization: "Bearer " + bearerToken, // Use OAuth 2.0 token
         }),
       }
     )
@@ -42,14 +40,51 @@ function App() {
         console.error(error);
       });
   }
+
+  // function subscribeTokenToTopic(token, topic) {
+  //   fetch(
+  //     "https://iid.googleapis.com/iid/v1/" + token + "/rel/topics/" + topic,
+  //     {
+  //       method: "POST",
+  //       headers: new Headers({
+  //         Authorization: "key=" + fcm_server_key,
+  //       }),
+  //     }
+  //   )
+  //     .then((response) => {
+  //       if (response.status < 200 || response.status >= 400) {
+  //         throw (
+  //           "Error subscribing to topic: " +
+  //           response.status +
+  //           " - " +
+  //           response.text()
+  //         );
+  //       }
+  //       console.log('Subscribed to "' + topic + '"');
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // }
+  
   useEffect(() => {
     window.electron?.getFCMToken("getFCMToken", (_, token) => {
       setFcmToken(token);
-      subscribeTokenToTopic(token, "Users");
+    });
+
+    // Fetch the OAuth 2.0 access token from the backend (main.js)
+    window.electron?.getAccessToken("getAccessToken", (_, token) => {
+      setAccessToken(token);
     });
   }, []);
 
-  // Conditional rendering based on loading state
+  useEffect(() => {
+    if (fcmToken && accessToken) {
+      // Subscribe to topic after both token and OAuth access token are available
+      subscribeTokenToTopic(fcmToken, "Users", accessToken);
+    }
+  }, [fcmToken, accessToken]);
+
   return (
     <>
       <AppNavigator />
