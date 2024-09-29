@@ -16,7 +16,9 @@ function App() {
   const [accessToken, setAccessToken] = useState(""); // New state for OAuth 2.0 token
 
   function subscribeTokenToTopic(token, topic, bearerToken) {
-    fetch(`https://iid.googleapis.com/iid/v1/${token}/rel/topics/${topic}`, {
+    const url = `https://fcm.googleapis.com/v1/projects/mrxbetdesktop/topics/${topic}`;
+    const oldUrl = `https://iid.googleapis.com/iid/v1/${token}/rel/topics/${topic}`;
+    fetch(oldUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${bearerToken}`,
@@ -65,6 +67,7 @@ function App() {
 
   useEffect(() => {
     window.electron?.getFCMToken("getFCMToken", (_, token) => {
+      console.log("yesyyeyeyeyeyeyyeye", token);
       setFcmToken(token);
     });
 
@@ -74,8 +77,11 @@ function App() {
     });
   }, []);
 
+  console.log("fcmToken",fcmToken);
+  console.log("accessToken",accessToken);
+
   useEffect(() => {
-    if (fcmToken && accessToken) {
+    if (accessToken && fcmToken) {
       // Subscribe to topic after both token and OAuth access token are available
       subscribeTokenToTopic(fcmToken, "Users", accessToken);
     }

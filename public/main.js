@@ -8,12 +8,13 @@ const {
   Menu,
 } = require("electron");
 const path = require("path");
-const { setup: setupPushReceiver } = require("electron-push-receiver");
+const { setup: setupPushReceiver } = require("firebase-electron");
+
 const { google } = require("googleapis");
 
 // Load your Firebase service account key
 const SERVICE_ACCOUNT_KEY_PATH = path.join(__dirname, "service-account.json");
-console.log('SERVICE_ACCOUNT_KEY_PATH',SERVICE_ACCOUNT_KEY_PATH);
+console.log("SERVICE_ACCOUNT_KEY_PATH", SERVICE_ACCOUNT_KEY_PATH);
 let mainWindow;
 let tray;
 let forceQuit = false;
@@ -69,15 +70,15 @@ async function getOAuthToken() {
   try {
     const auth = new google.auth.GoogleAuth({
       keyFile: SERVICE_ACCOUNT_KEY_PATH,
-      scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
+      scopes: ["https://www.googleapis.com/auth/firebase.messaging"],
     });
-    console.log('Auth object initialized:', auth);  // Debugging
-    
+    console.log("Auth object initialized:", auth); // Debugging
+
     const accessToken = await auth.getAccessToken();
-    console.log('Access token generated:', accessToken);  // Debugging
+    console.log("Access token generated:", accessToken); // Debugging
     return accessToken;
   } catch (error) {
-    console.error('Error in getOAuthToken:', error);
+    console.error("Error in getOAuthToken:", error);
     throw error;
   }
 }
@@ -90,12 +91,12 @@ async function getOAuthToken() {
 //     console.error("Error getting access token:", error);
 //   }
 // });
-ipcMain.handle('get-oauth-token', async () => {
+ipcMain.handle("get-oauth-token", async () => {
   try {
     const token = await getOAuthToken();
     return token;
   } catch (error) {
-    console.error('Error fetching OAuth token:', error);
+    console.error("Error fetching OAuth token:", error);
     throw error;
   }
 });
@@ -197,10 +198,14 @@ const setupIPC = async () => {
   const store = new Store();
 
   ipcMain.on("storeFCMToken", (event, token) => {
+    console.log("Stored FCM Token:", token);
     store.set("fcm_token", token);
   });
 
   ipcMain.on("getFCMToken", (event) => {
+    console.log(
+      "getFCMTokengetFCMTokengetFCMTokengetFCMTokengetFCMToken--main"
+    );
     const token = store.get("fcm_token");
     event.sender.send("getFCMToken", token);
   });
@@ -232,8 +237,8 @@ app.on("open-url", (event, url) => {
 const setupApp = async () => {
   await app.whenReady();
   await createWindow();
-  createTray(); // Initialize with the default tray icon
   setupIPC();
+  createTray(); // Initialize with the default tray icon
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
