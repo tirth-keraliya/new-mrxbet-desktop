@@ -12,7 +12,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
 // });
 
 contextBridge.exposeInMainWorld("electron", {
-  getFCMToken: (channel, callback) => ipcRenderer.on(channel, callback),
+  // getFCMToken: (channel, callback) => ipcRenderer.on(channel, callback),
+  getFCMToken: (channel, func) => {
+    ipcRenderer.once(channel, func);
+    ipcRenderer.send("getFCMToken");
+  },
   getAccessToken: (channel, callback) => ipcRenderer.on(channel, callback),
   getOAuthToken: (callback) =>
     ipcRenderer.invoke("get-oauth-token").then(callback),
@@ -25,6 +29,10 @@ ipcRenderer.send("PUSH_RECEIVER:::START_NOTIFICATION_SERVICE", senderId);
 ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_SERVICE_STARTED", (_, token) => {
   console.log("PUSH_RECEIVER--storeFCMToken--token", token);
   ipcRenderer.send("storeFCMToken", token);
+});
+
+ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_SERVICE_ERROR", (event, token) => {
+  console.log("NOTIFICATION_SERVICE_ERROR", event, token);
 });
 
 ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_RECEIVED", (_, notification) => {

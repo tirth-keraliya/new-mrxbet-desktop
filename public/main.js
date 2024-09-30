@@ -167,6 +167,7 @@ ipcMain.on("change-app-icon", (event, iconName) => {
 
 // IPC listener for sending notifications
 ipcMain.on("send-notification", (event, arg) => {
+  console.log("yeyeyeyeyeyeyeyeyeyeyeyeyeye", event, arg);
   const notification = new Notification({
     title: arg?.notification.title,
     body: arg?.notification.body,

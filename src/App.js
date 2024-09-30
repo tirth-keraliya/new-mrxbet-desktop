@@ -15,11 +15,19 @@ function App() {
   const [fcmToken, setFcmToken] = useState("");
   const [accessToken, setAccessToken] = useState(""); // New state for OAuth 2.0 token
 
+  // https://fcm.googleapis.com/v1/projects/mrxbetdesktop:subscribeToTopic
   function subscribeTokenToTopic(token, topic, bearerToken) {
-    const url = `https://fcm.googleapis.com/v1/projects/mrxbetdesktop/topics/${topic}`;
+
+    const payload = {
+      to: `/topics/${topic}`,
+      registration_tokens: [token],
+    };
+
+    const url = `https://fcm.googleapis.com/v1/projects/mrxbetdesktop:subscribeToTopic`;
     const oldUrl = `https://iid.googleapis.com/iid/v1/${token}/rel/topics/${topic}`;
-    fetch(oldUrl, {
+    fetch(url, {
       method: "POST",
+      body: JSON.stringify(payload),
       headers: {
         Authorization: `Bearer ${bearerToken}`,
         "Content-Type": "application/json",
