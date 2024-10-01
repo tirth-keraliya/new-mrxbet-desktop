@@ -36,7 +36,7 @@
     "path-browserify": "^1.0.1"
   },
   "build": {
-    "appId": "com.devservices.mrxbet",
+    "appId": "com.devservices.mrxbetdesktop",
     "files": [
       "build/**/*",
       "public/**/*",

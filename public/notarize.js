@@ -11,7 +11,7 @@ exports.default = async function notarizing(context) {
 
   try {
     await notarize({
-      appBundleId: "com.devservices.mrxbet",
+      appBundleId: "com.devservices.mrxbetdesktop",
       appPath: `${appOutDir}/${appName}.app`,
       appleId: "test.wecode.inc@gmail.com",
       appleIdPassword: "kctx-lmdr-popz-fhqx",
