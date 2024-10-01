@@ -68,7 +68,7 @@
       "identity": "patel kuldeep (G6G549CHCQ)",
       "entitlements": "./installer/entitlements.mac.plist",
       "entitlementsInherit": "./installer/entitlements.mac.plist",
-      "provisioningProfile": "./resources/MacStore/mrxbet.provisionprofile",
+      "provisioningProfile": "./resources/MacStore/NewMrXBet.provisionprofile",
       "asarUnpack": "**/*.node",
       "gatekeeperAssess": false
     },

@@ -14,7 +14,7 @@ exports.default = async function notarizing(context) {
       appBundleId: "com.devservices.mrxbet",
       appPath: `${appOutDir}/${appName}.app`,
       appleId: "test.wecode.inc@gmail.com",
-      appleIdPassword: "frmb-fxzz-lkmt-suxc",
+      appleIdPassword: "kctx-lmdr-popz-fhqx",
       teamId: "G6G549CHCQ",
     });
     console.log("Notarization successful!");
