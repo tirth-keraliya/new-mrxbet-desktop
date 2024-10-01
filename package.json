@@ -45,7 +45,7 @@
       "public/preload.js"
     ],
     "extraResources": [
-      "./assets/**"
+      "./images/**"
     ],
     "productName": "MrXbet",
     "artifactName": "${productName}-${version}.${ext}",

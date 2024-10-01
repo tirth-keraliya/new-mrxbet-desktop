@@ -6,6 +6,7 @@ const {
   Notification,
   Tray,
   Menu,
+  nativeImage,
 } = require("electron");
 const path = require("path");
 const { setup: setupPushReceiver } = require("electron-push-receiver");
@@ -64,9 +65,9 @@ const createWindow = async () => {
 const createTray = (iconName = "icon") => {
   let iconPath;
   if (process.platform === "darwin") {
-    iconPath = path.join(__dirname, "images", `${iconName}.icns`);
+    iconPath = path.join(__dirname, "../images", `${iconName}.png`);
   } else {
-    iconPath = path.join(__dirname, "images", `${iconName}.ico`);
+    iconPath = path.join(__dirname, "../images", `${iconName}.ico`);
   }
 
   tray = new Tray(iconPath); // Set your tray icon
@@ -90,13 +91,29 @@ const createTray = (iconName = "icon") => {
 
   console.log(`Tray icon set to: ${iconPath}`);
 };
+const updateDockIcon = (iconName) => {
+  if (process.platform === "darwin") {
+    const dockIconPath = path.resolve(
+      app.getAppPath(),
+      `images/${iconName}.png`
+    );
+    const dockIcon = nativeImage.createFromPath(dockIconPath);
+
+    if (!dockIcon.isEmpty()) {
+      app.dock.setIcon(dockIcon); // Set the dynamic .png dock icon
+      console.log(`Dock icon changed to: ${dockIconPath}`);
+    } else {
+      console.error(`Failed to load dock icon: ${dockIconPath}`);
+    }
+  }
+};
 
 // IPC listener to dynamically change both the app icon, tray icon, and overlay icon
 ipcMain.on("change-app-icon", (event, iconName) => {
   let iconPath;
 
   if (process.platform === "darwin") {
-    iconPath = path.resolve(app.getAppPath(), `images/${iconName}.icns`);
+    iconPath = path.resolve(app.getAppPath(), `../images/${iconName}.png`);
   } else {
     iconPath = path.resolve(app.getAppPath(), `images/${iconName}.ico`);
   }
@@ -104,20 +121,20 @@ ipcMain.on("change-app-icon", (event, iconName) => {
   if (mainWindow) {
     try {
       // Change the window icon
-      mainWindow.setIcon(iconPath);
-      console.log(`App icon changed to: ${iconPath}`);
-
+      if (process.platform !== "darwin") {
+        mainWindow.setIcon(iconPath);
+        console.log(`App icon changed to: ${iconPath}`);
+      }
       // Change the tray icon
       createTray(iconName);
-      console.log(`Tray icon changed to: ${iconPath}`);
+      updateDockIcon(iconName);
 
-      // Change the overlay icon using the specified path
-      const overlayIconPath =
-        process.platform === "darwin"
-          ? path.join(__dirname, `images/${iconName}.icns`)
-          : path.join(__dirname, `images/${iconName}.ico`);
-      mainWindow.setOverlayIcon(overlayIconPath, "Overlay description"); // Set the overlay icon
-      console.log(`Overlay icon changed to: ${overlayIconPath}`);
+      if (process.platform === "win32") {
+        // Windows: Change the overlay icon (this is Windows-only functionality)
+        const overlayIconPath = path.join(__dirname, `images/${iconName}.ico`);
+        mainWindow.setOverlayIcon(overlayIconPath, "Overlay description");
+        console.log(`Overlay icon changed to: ${overlayIconPath}`);
+      }
     } catch (err) {
       console.error(`Failed to set icons: ${err}`);
     }
