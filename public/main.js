@@ -50,10 +50,12 @@ const createWindow = async () => {
       forceQuit = true;
     });
 
-    mainWindow.on("close", function (event) {
+    mainWindow.on("close", (event) => {
       if (!forceQuit) {
         event.preventDefault();
-        mainWindow.hide();
+        mainWindow.hide(); // Hide the window instead of closing it
+      } else {
+        mainWindow = null; // Allow the window to be cleaned up
       }
     });
   }
@@ -213,18 +215,19 @@ const setupApp = async () => {
   setupIPC();
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+    if (mainWindow === null) {
+      createWindow(); // Recreate the window if it was closed
     } else {
-      mainWindow.show();
+      mainWindow.show(); // Show the hidden window
     }
   });
 
   app.on("before-quit", () => {
-    forceQuit = true;
+    forceQuit = true; // Ensure the app can quit without issues
   });
 
   app.on("window-all-closed", () => {
+    // Only quit the app on non-macOS platforms
     if (process.platform !== "darwin") {
       app.quit();
     }
