@@ -49,13 +49,13 @@ const createWindow = async () => {
     app.on("before-quit", function () {
       forceQuit = true;
     });
-
+  
     mainWindow.on("close", (event) => {
       if (!forceQuit) {
         event.preventDefault();
         mainWindow.hide(); // Hide the window instead of closing it
       } else {
-        mainWindow = null; // Allow the window to be cleaned up
+        mainWindow = null; // Allow the window to be cleaned up on quit
       }
     });
   }
@@ -214,11 +214,11 @@ const setupApp = async () => {
   createTray(); // Initialize with the default tray icon
   setupIPC();
 
-  app.on("activate", () => {
-    if (mainWindow === null) {
-      createWindow(); // Recreate the window if it was closed
+  app.on('activate', () => {
+    if (mainWindow === null || BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
     } else {
-      mainWindow.show(); // Show the hidden window
+      mainWindow.show();
     }
   });
 
@@ -226,6 +226,10 @@ const setupApp = async () => {
     forceQuit = true; // Ensure the app can quit without issues
   });
 
+  app.on("ready", () => {
+    createWindow(); // Create the main window on app start
+  });
+  
   app.on("window-all-closed", () => {
     // Only quit the app on non-macOS platforms
     if (process.platform !== "darwin") {
