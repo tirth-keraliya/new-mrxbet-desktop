@@ -19,8 +19,8 @@ let forceQuit = false;
 const createWindow = async () => {
   const { default: isDev } = await import("electron-is-dev");
   mainWindow = new BrowserWindow({
-    autoHideMenuBar: false,
-    width: 344,
+    autoHideMenuBar: true,
+    width: 600,
     height: 788,
     icon: path.join(__dirname, "images", "icon.ico"),
     webPreferences: {

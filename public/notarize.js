@@ -13,8 +13,8 @@ exports.default = async function notarizing(context) {
     await notarize({
       appBundleId: "com.devservices.mrxbetdesktopapp",
       appPath: `${appOutDir}/${appName}.app`,
-      appleId: "test.wecode.inc@gmail.com",
-      appleIdPassword: "kctx-lmdr-popz-fhqx",
+      appleId: "mrxbetapp@gmail.com",
+      appleIdPassword: "uulr-tnep-wtjh-gypb",
       teamId: "G6G549CHCQ",
     });
     console.log("Notarization successful!");
