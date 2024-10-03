@@ -36,9 +36,7 @@ const SplashScreen = () => {
         const queryString = deepLink.split("?")[1];
         const params = new URLSearchParams(queryString);
         const fetchedPlayerId = params.get("playerid");
-        checkUserLogin(fetchedPlayerId);
-      } else {
-        checkUserLogin(null);
+        checkUserLogin(fetchedPlayerId); // Checking and navigating to the appropriate screen
       }
     };
 

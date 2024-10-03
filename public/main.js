@@ -12,7 +12,7 @@ const path = require("path");
 const { setup: setupPushReceiver } = require("electron-push-receiver");
 
 let mainWindow;
-let tray;
+let tray = null;
 let forceQuit = false;
 
 // Function to create the main app window
@@ -49,7 +49,7 @@ const createWindow = async () => {
     app.on("before-quit", function () {
       forceQuit = true;
     });
-  
+
     mainWindow.on("close", (event) => {
       if (!forceQuit) {
         event.preventDefault();
@@ -65,14 +65,30 @@ const createWindow = async () => {
 
 // Function to create the tray icon
 const createTray = (iconName = "icon") => {
-  let iconPath;
-  if (process.platform === "darwin") {
-    iconPath = path.join(__dirname, "../images", `${iconName}.png`);
-  } else {
-    iconPath = path.join(__dirname, "../images", `${iconName}.ico`);
+  // Check if the tray already exists
+  if (tray) {
+    console.log("Tray icon already exists.");
+    return; // Exit if the tray is already created
   }
 
-  tray = new Tray(iconPath); // Set your tray icon
+  let iconPath;
+  if (process.platform === "darwin") {
+    iconPath = path.join(__dirname, "../images", `icon.png`);
+  } else {
+    iconPath = path.join(__dirname, "../images", `icon.png`);
+  }
+
+  // Load the icon using nativeImage and resize it for tray
+  let trayIcon = nativeImage.createFromPath(iconPath);
+
+  if (process.platform === "darwin") {
+    trayIcon = trayIcon.resize({ width: 16, height: 16 }); // For macOS
+  } else {
+    trayIcon = trayIcon.resize({ width: 16, height: 16 }); // For Windows
+  }
+
+  tray = new Tray(trayIcon); // Set the resized tray icon
+
   const contextMenu = Menu.buildFromTemplate([
     { label: "Open App", click: () => mainWindow.show() },
     {
@@ -93,6 +109,7 @@ const createTray = (iconName = "icon") => {
 
   console.log(`Tray icon set to: ${iconPath}`);
 };
+
 const updateDockIcon = (iconName) => {
   if (process.platform === "darwin") {
     const dockIconPath = path.resolve(
@@ -188,24 +205,39 @@ const setupIPC = async () => {
 // Handle Branch deep links
 app.on("second-instance", (event, commandLine) => {
   if (mainWindow && commandLine.length >= 2) {
-    const deepLink = commandLine.find((arg) => arg.startsWith("mrxbet://"));
+    const deepLink = commandLine.find((arg) =>
+      arg.startsWith("https://mrxbet.net/")
+    );
+    console.log(`deeplink command new: ${deepLink}`);
     if (deepLink) {
-      mainWindow.webContents.send("deep-link", deepLink);
+      // Extract playerid using URLSearchParams
+      const url = new URL(deepLink);
+      console.log(`url new: ${url}`);
+      console.log(`deeplink new: ${deepLink}`);
+      const playerid = url.searchParams.get("playerid");
+
+      // Check if playerid exists and is valid
+      if (playerid) {
+        // Send the deep-link with playerid to the renderer process
+        mainWindow.webContents.send("deep-link", { screen: "home", playerid });
+      }
     }
   }
 });
 
 // Register protocol and handle deep links for Windows
-app.setAsDefaultProtocolClient("mrxbet");
 
 // Handle open-url event for macOS
 app.on("open-url", (event, url) => {
-  console.log("Deep link:", url);
+  console.log(`url new open-url: ${url}`);
+  console.log(`url new open-event: ${JSON.stringify(event)}`);
   event.preventDefault();
   if (mainWindow) {
+    // Send deep link to renderer process
     mainWindow.webContents.send("deep-link", url);
   }
 });
+app.setAsDefaultProtocolClient("mrxbet");
 
 // Function to initialize the app
 const setupApp = async () => {
@@ -214,7 +246,7 @@ const setupApp = async () => {
   createTray(); // Initialize with the default tray icon
   setupIPC();
 
-  app.on('activate', () => {
+  app.on("activate", () => {
     if (mainWindow === null || BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     } else {
@@ -229,7 +261,7 @@ const setupApp = async () => {
   app.on("ready", () => {
     createWindow(); // Create the main window on app start
   });
-  
+
   app.on("window-all-closed", () => {
     // Only quit the app on non-macOS platforms
     if (process.platform !== "darwin") {

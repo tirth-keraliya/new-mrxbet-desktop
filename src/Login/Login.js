@@ -43,9 +43,10 @@ export default function LoginScreen() {
         const queryString = deepLink.split("?")[1];
         const params = new URLSearchParams(queryString);
         const fetchedPlayerId = params.get("playerid");
-        checkUserLogin(fetchedPlayerId);
+
+        checkUserLogin(fetchedPlayerId); // Validate and navigate
       } else {
-        checkUserLogin(null);
+        checkUserLogin(null); // Fallback to default login screen
       }
     };
 
@@ -105,10 +106,6 @@ export default function LoginScreen() {
             )}
           </button>
         </div>
-        {/* <div>
-          <button onClick={() => changeIcon("platinum")}>Platinum</button>
-          <button onClick={() => changeIcon("bronze")}>Bronze</button>
-        </div> */}
       </div>
     </div>
   );
