@@ -40,7 +40,7 @@
     "path-browserify": "^1.0.1"
   },
   "build": {
-    "appId": "com.devservices.mrxbet",
+    "appId": "com.devservices.mrxbetdesktopapp",
     "files": [
       "build/**/*",
       "public/**/*",
@@ -49,13 +49,7 @@
       "public/preload.js"
     ],
     "extraResources": [
-      {
-        "from": "images/",
-        "to": "images/",
-        "filter": [
-          "**/*"
-        ]
-      }
+      "./assets/**"
     ],
     "productName": "MrXbet",
     "artifactName": "${productName}-${version}.${ext}",
@@ -78,7 +72,7 @@
       "identity": "patel kuldeep (G6G549CHCQ)",
       "entitlements": "./installer/entitlements.mac.plist",
       "entitlementsInherit": "./installer/entitlements.mac.plist",
-      "provisioningProfile": "./resources/MacStore/mrxbet.provisionprofile",
+      "provisioningProfile": "./resources/MacStore/mrxbetdesktopapp.provisionprofile",
       "asarUnpack": "**/*.node",
       "gatekeeperAssess": false
     },
