@@ -26,7 +26,7 @@ const createWindow = async () => {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      devTools: false,
+      devTools: true,
       preload: path.join(__dirname, "./preload.js"),
     },
   });
@@ -206,9 +206,7 @@ const setupIPC = async () => {
 // Handle Branch deep links
 app.on("second-instance", (event, commandLine) => {
   if (mainWindow && commandLine.length >= 2) {
-    const deepLink = commandLine.find((arg) =>
-      arg.startsWith("https://mrxbet.net/")
-    );
+    const deepLink = commandLine.find((arg) => arg.startsWith("mrxbet://"));
     console.log(`deeplink command new: ${deepLink}`);
     if (deepLink) {
       // Extract playerid using URLSearchParams
