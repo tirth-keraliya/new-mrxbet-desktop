@@ -24,7 +24,13 @@ contextBridge.exposeInMainWorld("electron", {
 
 // Start FCM service with your sender ID
 const senderId = "1020073407571"; // Replace with your FCM sender ID
-ipcRenderer.send("PUSH_RECEIVER:::START_NOTIFICATION_SERVICE", senderId);
+ipcRenderer.send(
+  "PUSH_RECEIVER:::START_NOTIFICATION_SERVICE",
+  "1:906015690862:web:e8bdd5543600a57935967f",
+  "mrxbettest",
+  "AIzaSyDaE6sDp8avtnh--XmnwNjjcVTLAD4dw6w",
+  "BKH8GiF267RoPmnRNwspiz3Yt3NAv0QVhPg-QyAIMUP9wREO40RXCpbVdJvKb87Q34Df17xpQJEOTDNWO3s03wI"
+);
 
 ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_SERVICE_STARTED", (_, token) => {
   console.log("PUSH_RECEIVER--storeFCMToken--token", token);

@@ -7,6 +7,7 @@
   "homepage": "./",
   "publicPath": "./",
   "dependencies": {
+    "@cuj1559/electron-push-receiver": "^3.1.8",
     "@electron/notarize": "^2.3.2",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",

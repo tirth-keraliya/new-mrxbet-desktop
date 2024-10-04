@@ -17,34 +17,31 @@ function App() {
 
   // https://fcm.googleapis.com/v1/projects/mrxbetdesktop:subscribeToTopic
   function subscribeTokenToTopic(token, topic, bearerToken) {
-
-    const payload = {
-      to: `/topics/${topic}`,
-      registration_tokens: [token],
-    };
-
-    const url = `https://fcm.googleapis.com/v1/projects/mrxbetdesktop:subscribeToTopic`;
-    const oldUrl = `https://iid.googleapis.com/iid/v1/${token}/rel/topics/${topic}`;
-    fetch(url, {
-      method: "POST",
-      body: JSON.stringify(payload),
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-        "Content-Type": "application/json",
-      },
-    })
+    fetch(
+      "https://iid.googleapis.com/iid/v1/" + token + "/rel/topics/" + topic,
+      {
+        method: "POST",
+        headers: new Headers({
+          Authorization: "Bearer " + bearerToken,
+          "Content-Type": "application/json; UTF-8",
+          access_token_auth: true,
+        }),
+      }
+    )
       .then((response) => {
-        if (response.ok) {
-          console.log(`Subscribed to topic: ${topic}`);
-        } else {
-          return response.text().then((errorText) => {
-            console.error(
-              `Error subscribing to topic: ${response.status} - ${errorText}`
-            );
-          });
+        if (response.status < 200 || response.status >= 400) {
+          throw (
+            "Error subscribing to topic: " +
+            response.status +
+            " - " +
+            response.text()
+          );
         }
+        console.log('Subscribed to "' + topic + '"');
       })
-      .catch((err) => console.error("Fetch error:", err));
+      .catch((error) => {
+        console.error(error);
+      });
   }
 
   // function subscribeTokenToTopic(token, topic) {
@@ -85,13 +82,13 @@ function App() {
     });
   }, []);
 
-  console.log("fcmToken",fcmToken);
-  console.log("accessToken",accessToken);
+  console.log("fcmToken", fcmToken);
+  console.log("accessToken", accessToken);
 
   useEffect(() => {
     if (accessToken && fcmToken) {
       // Subscribe to topic after both token and OAuth access token are available
-      subscribeTokenToTopic(fcmToken, "Users", accessToken);
+      // subscribeTokenToTopic(fcmToken, "Users", accessToken);
     }
   }, [fcmToken, accessToken]);
 
