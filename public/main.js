@@ -10,12 +10,8 @@ const {
 } = require("electron");
 const path = require("path");
 const { setup: setupPushReceiver } = require("@cuj1559/electron-push-receiver");
-
 const { google } = require("googleapis");
 
-// Load your Firebase service account key
-const SERVICE_ACCOUNT_KEY_PATH = path.join(__dirname, "service-account.json");
-console.log("SERVICE_ACCOUNT_KEY_PATH", SERVICE_ACCOUNT_KEY_PATH);
 let mainWindow;
 let tray = null;
 let forceQuit = false;
@@ -37,8 +33,9 @@ const createWindow = async () => {
   });
 
   const appUrl = isDev
-    ? "http://localhost:3000" // Dev mode (React's development server)
+    ? "http://localhost:3000"
     : `file://${path.join(__dirname, "../build/index.html")}`;
+
   mainWindow.loadURL(appUrl);
 
   setupPushReceiver(mainWindow.webContents);
@@ -69,48 +66,9 @@ const createWindow = async () => {
   return mainWindow;
 };
 
-// Function to generate OAuth 2.0 token
-async function getOAuthToken() {
-  try {
-    // const auth = new google.auth.GoogleAuth({
-    //   keyFile: SERVICE_ACCOUNT_KEY_PATH,
-    //   scopes: ["https://www.googleapis.com/auth/firebase.messaging"],
-    // });
-    // console.log("Auth object initialized:", auth); // Debugging
-
-    // const accessToken = await auth.getAccessToken();
-    // console.log("Access token generated:", accessToken); // Debugging
-    return "accessToken";
-  } catch (error) {
-    console.error("Error in getOAuthToken:", error);
-    throw error;
-  }
-}
-// IPC listener to fetch OAuth 2.0 token
-// ipcMain.on("getAccessToken", async (event) => {
-//   try {
-//     const token = await getAccessToken();
-//     event.sender.send("accessToken", token);
-//   } catch (error) {
-//     console.error("Error getting access token:", error);
-//   }
-// });
-ipcMain.handle("get-oauth-token", async () => {
-  try {
-    const token = await getOAuthToken();
-    return token;
-  } catch (error) {
-    console.error("Error fetching OAuth token:", error);
-    throw error;
-  }
-});
-
-// Function to create the tray icon
 const createTray = (iconName = "icon") => {
-  // Check if the tray already exists
   if (tray) {
-    console.log("Tray icon already exists.");
-    return; // Exit if the tray is already created
+    return;
   }
 
   let iconPath;
@@ -120,16 +78,15 @@ const createTray = (iconName = "icon") => {
     iconPath = path.join(__dirname, "../images", `icon.png`);
   }
 
-  // Load the icon using nativeImage and resize it for tray
   let trayIcon = nativeImage.createFromPath(iconPath);
 
   if (process.platform === "darwin") {
-    trayIcon = trayIcon.resize({ width: 16, height: 16 }); // For macOS
+    trayIcon = trayIcon.resize({ width: 16, height: 16 });
   } else {
-    trayIcon = trayIcon.resize({ width: 16, height: 16 }); // For Windows
+    trayIcon = trayIcon.resize({ width: 16, height: 16 });
   }
 
-  tray = new Tray(trayIcon); // Set the resized tray icon
+  tray = new Tray(trayIcon);
 
   const contextMenu = Menu.buildFromTemplate([
     { label: "Open App", click: () => mainWindow.show() },
@@ -146,7 +103,7 @@ const createTray = (iconName = "icon") => {
   tray.setContextMenu(contextMenu);
 
   tray.on("click", () => {
-    mainWindow.show(); // Show the app window when tray icon is clicked
+    mainWindow.show();
   });
 
   console.log(`Tray icon set to: ${iconPath}`);
@@ -159,9 +116,8 @@ const updateDockIcon = (iconName) => {
       `images/${iconName}.png`
     );
     const dockIcon = nativeImage.createFromPath(dockIconPath);
-
     if (!dockIcon.isEmpty()) {
-      app.dock.setIcon(dockIcon); // Set the dynamic .png dock icon
+      app.dock.setIcon(dockIcon);
       console.log(`Dock icon changed to: ${dockIconPath}`);
     } else {
       console.error(`Failed to load dock icon: ${dockIconPath}`);
@@ -169,7 +125,6 @@ const updateDockIcon = (iconName) => {
   }
 };
 
-// IPC listener to dynamically change both the app icon, tray icon, and overlay icon
 ipcMain.on("change-app-icon", (event, iconName) => {
   let iconPath;
 
@@ -181,20 +136,17 @@ ipcMain.on("change-app-icon", (event, iconName) => {
 
   if (mainWindow) {
     try {
-      // Change the window icon
       if (process.platform !== "darwin") {
         mainWindow.setIcon(iconPath);
-        console.log(`App icon changed to: ${iconPath}`);
+        console.log(`MACOS -- App icon changed to: ${iconPath}`);
       }
-      // Change the tray icon
       createTray(iconName);
       updateDockIcon(iconName);
 
       if (process.platform === "win32") {
-        // Windows: Change the overlay icon (this is Windows-only functionality)
         const overlayIconPath = path.join(__dirname, `images/${iconName}.ico`);
         mainWindow.setOverlayIcon(overlayIconPath, "Overlay description");
-        console.log(`Overlay icon changed to: ${overlayIconPath}`);
+        console.log(`WINDOW -- Overlay icon changed to: ${overlayIconPath}`);
       }
     } catch (err) {
       console.error(`Failed to set icons: ${err}`);
@@ -202,9 +154,8 @@ ipcMain.on("change-app-icon", (event, iconName) => {
   }
 });
 
-// IPC listener for sending notifications
 ipcMain.on("send-notification", (event, arg) => {
-  console.log("yeyeyeyeyeyeyeyeyeyeyeyeyeye", event, arg);
+  // console.log("arg--arg", arg);
   const notification = new Notification({
     title: arg?.notification.title,
     body: arg?.notification.body,
@@ -245,7 +196,7 @@ function getGoogleAccessToken() {
         reject(err);
         return;
       }
-      console.log("tokens--tokens--jwt", tokens);
+      console.log("tokens--tokens--jwt", !!tokens);
       resolve(tokens.access_token);
     });
   });
@@ -254,10 +205,11 @@ function getGoogleAccessToken() {
 function initFcmToken(token) {
   getGoogleAccessToken().then((resolve, _) => {
     if (resolve != null) {
-      console.log("Service successfully started\nOAuth:", resolve);
-
       fetch(
-        "https://iid.googleapis.com/iid/v1/" + token + "/rel/topics/" + "news",
+        "https://iid.googleapis.com/iid/v1/" +
+          token +
+          "/rel/topics/" +
+          "MrXbet",
         {
           method: "POST",
           headers: new Headers({
@@ -269,20 +221,17 @@ function initFcmToken(token) {
       )
         .then((response) => {
           if (response.status < 200 || response.status >= 400) {
-            // Read the error message correctly
             return response.json().then((errorData) => {
-              throw new Error(
-                "Error subscribing to topic: " +
-                  response.status +
-                  " - " +
-                  JSON.stringify(errorData)
+              console.log(
+                "Error subscribing to topic: ",
+                JSON.stringify(errorData)
               );
             });
           }
-          console.log('Subscribed to "' + "news" + '"');
+          console.log('Subscribed to "' + "MrXbet");
         })
         .catch((error) => {
-          console.error(error.message || error);
+          console.log('Subscribed to "' + "MrXbet", error);
         });
     }
   });
@@ -290,7 +239,7 @@ function initFcmToken(token) {
 
 // Function to set up IPC handlers for FCM token management
 const setupIPC = async () => {
-  const Store = (await import("electron-store")).default; // Dynamic import
+  const Store = (await import("electron-store")).default;
   const store = new Store();
 
   ipcMain.on("storeFCMToken", (event, token) => {
@@ -301,15 +250,10 @@ const setupIPC = async () => {
 
   ipcMain.on("getFCMToken", (event) => {
     const token = store.get("fcm_token");
-    console.log(
-      "getFCMTokengetFCMTokengetFCMTokengetFCMTokengetFCMToken--main",
-      token
-    );
     event.sender.send("getFCMToken", token);
   });
 };
 
-// Handle Branch deep links
 app.on("second-instance", (event, commandLine) => {
   if (mainWindow && commandLine.length >= 2) {
     const deepLink = commandLine.find((arg) => arg.startsWith("mrxbet://"));
@@ -330,12 +274,8 @@ app.on("second-instance", (event, commandLine) => {
   }
 });
 
-// Register protocol and handle deep links for Windows
-
 // Handle open-url event for macOS
 app.on("open-url", (event, url) => {
-  console.log(`url new open-url: ${url}`);
-  console.log(`url new open-event: ${JSON.stringify(event)}`);
   event.preventDefault();
   if (mainWindow) {
     // Send deep link to renderer process
@@ -349,7 +289,7 @@ const setupApp = async () => {
   await app.whenReady();
   await createWindow();
   setupIPC();
-  createTray(); // Initialize with the default tray icon
+  createTray();
 
   app.on("activate", () => {
     if (mainWindow === null || BrowserWindow.getAllWindows().length === 0) {
@@ -360,15 +300,14 @@ const setupApp = async () => {
   });
 
   app.on("before-quit", () => {
-    forceQuit = true; // Ensure the app can quit without issues
+    forceQuit = true;
   });
 
   app.on("ready", () => {
-    createWindow(); // Create the main window on app start
+    createWindow();
   });
 
   app.on("window-all-closed", () => {
-    // Only quit the app on non-macOS platforms
     if (process.platform !== "darwin") {
       app.quit();
     }

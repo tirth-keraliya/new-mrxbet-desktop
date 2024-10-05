@@ -1,29 +1,17 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-// Expose functions to the renderer process
 contextBridge.exposeInMainWorld("electronAPI", {
   openLink: (url) => ipcRenderer.send("open-link", url),
-  // changeIcon: (iconName) => ipcRenderer.send("change-app-icon", iconName),
   changeIcon: (iconName) => ipcRenderer.send("change-app-icon", iconName),
   onDeepLink: (callback) =>
     ipcRenderer.on("deep-link", (event, deepLink) => callback(deepLink)),
 });
-// contextBridge.exposeInMainWorld("electronAPI", {
-// });
 
 contextBridge.exposeInMainWorld("electron", {
-  // getFCMToken: (channel, callback) => ipcRenderer.on(channel, callback),
-  getFCMToken: (channel, func) => {
-    ipcRenderer.once(channel, func);
-    ipcRenderer.send("getFCMToken");
-  },
+  getFCMToken: (channel, callback) => ipcRenderer.on(channel, callback),
   getAccessToken: (channel, callback) => ipcRenderer.on(channel, callback),
-  getOAuthToken: (callback) =>
-    ipcRenderer.invoke("get-oauth-token").then(callback),
 });
 
-// Start FCM service with your sender ID
-const senderId = "1020073407571"; // Replace with your FCM sender ID
 ipcRenderer.send(
   "PUSH_RECEIVER:::START_NOTIFICATION_SERVICE",
   "1:906015690862:web:e8bdd5543600a57935967f",
@@ -33,22 +21,22 @@ ipcRenderer.send(
 );
 
 ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_SERVICE_STARTED", (_, token) => {
-  console.log("PUSH_RECEIVER--storeFCMToken--token", token);
+  console.log("PUSH_RECEIVER:::NOTIFICATION_SERVICE_STARTED", token);
   ipcRenderer.send("storeFCMToken", token);
 });
 
 ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_SERVICE_ERROR", (event, token) => {
-  console.log("NOTIFICATION_SERVICE_ERROR", event, token);
+  console.log("PUSH_RECEIVER:::NOTIFICATION_SERVICE_ERROR", event, token);
 });
 
 ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_RECEIVED", (_, notification) => {
-  console.log("Full Notification Content:", JSON.stringify(notification));
+  console.log("PUSH_RECEIVER:::NOTIFICATION_RECEIVED", JSON.stringify(notification));
 
   ipcRenderer.send("send-notification", notification);
 });
 
 ipcRenderer.on("PUSH_RECEIVER:::TOKEN_UPDATED", (_, token) => {
-  console.log("PUSH_RECEIVER--token--token", token);
+  console.log("PUSH_RECEIVER:::TOKEN_UPDATED", token);
   ipcRenderer.send("storeFCMToken", token);
 });
 
