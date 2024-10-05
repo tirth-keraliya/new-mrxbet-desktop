@@ -11,6 +11,7 @@ const {
 const path = require("path");
 const { setup: setupPushReceiver } = require("@cuj1559/electron-push-receiver");
 const { google } = require("googleapis");
+const axios = require("axios");
 
 let mainWindow;
 let tray = null;
@@ -154,15 +155,41 @@ ipcMain.on("change-app-icon", (event, iconName) => {
   }
 });
 
-ipcMain.on("send-notification", (event, arg) => {
+ipcMain.on("send-notification", async (event, arg) => {
   // console.log("arg--arg", arg);
+  let iconPath;
+  let icon;
+  if (arg?.notification?.image) {
+    // Check if the image is a URL or a local file
+    if (arg?.notification?.image.startsWith("http")) {
+      // If it's a URL, fetch it and convert to nativeImage
+      try {
+        const response = await axios.get(arg.notification.image, {
+          responseType: "arraybuffer",
+        });
+        const imageBuffer = Buffer.from(response.data, "binary");
+        icon = nativeImage.createFromBuffer(imageBuffer);
+      } catch (error) {
+        console.error("Error fetching image from URL:", error);
+        iconPath = path.resolve(__dirname, "images", "icon.ico");
+        icon = nativeImage.createFromPath(iconPath);
+      }
+    } else {
+      iconPath = path.resolve(__dirname, "images", "icon.ico");
+      icon = nativeImage.createFromPath(iconPath);
+    }
+  } else {
+    iconPath = path.resolve(__dirname, "images", "icon.ico");
+    icon = nativeImage.createFromPath(iconPath);
+  }
+
   const notification = new Notification({
     title: arg?.notification.title,
     body: arg?.notification.body,
     data: arg.data,
     silent: false,
     requireInteraction: true,
-    icon: path.join(__dirname, "images", "icon.ico"),
+    icon,
     type: "info",
     sound: "Default",
   });
