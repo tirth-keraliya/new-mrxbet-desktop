@@ -78,6 +78,8 @@
     },
     "dmg": {
       "sign": false,
+      "icon": "./images/icon.icns",
+      "background": "./images/dmgbackground.png",
       "title": "MrXbet ${version}"
     },
     "nsis": {
