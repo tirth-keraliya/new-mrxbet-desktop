@@ -51,7 +51,7 @@ export default function LoginScreen() {
     };
 
     // Listen for deep link events from Electron
-    window.electronAPI.onDeepLink(handleDeepLink);
+    window?.electronAPI?.onDeepLink(handleDeepLink);
   }, [checkUserLogin]);
 
   const onPressLogin = useCallback(async () => {

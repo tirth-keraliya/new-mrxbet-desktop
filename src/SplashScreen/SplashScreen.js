@@ -41,7 +41,7 @@ const SplashScreen = () => {
     };
 
     // Listen for deep link events from Electron
-    window.electronAPI.onDeepLink(handleDeepLink);
+    window?.electronAPI?.onDeepLink(handleDeepLink);
 
     // Call checkUserLogin immediately on mount to check for an existing player
     checkUserLogin(null);
