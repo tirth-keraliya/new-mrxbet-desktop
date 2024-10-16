@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import {
+  getContentfulLocation,
+  getContentfulTranslation,
   getPlayerByEmail,
   getPlayerByPlayerID,
 } from "../services/UserServices";
@@ -13,7 +15,55 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [translations, setTranslations] = useState({});
+  const [countryCodes, setCountryCodes] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCountryCodes = async () => {
+      try {
+        const data = await getContentfulLocation();
+        if (data.length > 0) {
+          setCountryCodes(data);
+        }
+      } catch (error) {
+        console.error("Failed to load country code:", error);
+      }
+    };
+    fetchCountryCodes();
+  }, []);
+
+  useEffect(() => {
+    const fetchLocale = async () => {
+      try {
+        const locale = await window.electronAPI.getLocale();
+        console.log(locale, "localll-localll");
+        fetchTranslations(locale); // Fetch translations with the locale
+      } catch (error) {
+        console.error("Failed to fetch locale:", error);
+      }
+    };
+    fetchLocale();
+  }, []);
+
+  const fetchTranslations = async (locale) => {
+    try {
+      const data = await getContentfulTranslation(locale);
+      console.log(data, "Fetched Translations Data");
+      setTranslations(data[0] || {}); // Set translations or an empty object if none
+    } catch (error) {
+      console.error("Failed to load translations:", error);
+    }
+  };
+  const translationsToDisplay = {
+    buttonText: translations?.buttonText,
+    emailPlaceholder: translations?.emailPlaceholder,
+    emailRequired: translations?.emailRequired,
+    validEmail: translations?.validEmail,
+    loginTitle: translations?.loginTitle,
+    loginDescription: translations?.loginDescription,
+    loginError: translations?.loginError,
+  };
 
   const checkUserLogin = useCallback(
     async (fetchedPlayerId) => {
@@ -57,23 +107,28 @@ export default function LoginScreen() {
   const onPressLogin = useCallback(async () => {
     setError("");
     if (email.trim().length === 0) {
-      setError("Email is required");
+      setError(translationsToDisplay.emailRequired);
       return;
     }
     if (!isValidEmail(email)) {
-      setError("Please enter a valid email");
+      setError(translationsToDisplay.validEmail);
       return;
     }
+
     setLoading(true);
     try {
       const response = await getPlayerByEmail(email);
-      navigate("/home"); // Replace with your route
+      if (response.error) {
+        throw new Error(response.error); // Assuming the API returns an error object
+      }
+      navigate("/home"); // Navigate on successful login
     } catch (error) {
-      setError(error.message); // Set the error message from the thrown error
+      setError(error.message || translationsToDisplay.loginError); // Use specific error messages
     } finally {
       setLoading(false);
     }
   }, [email, navigate]);
+
   //   const changeIcon = (iconName) => {
   //     // Send the icon change request to Electron via the ipcRenderer
   //     window.electronAPI.changeIcon(iconName);
@@ -82,11 +137,8 @@ export default function LoginScreen() {
   return (
     <div className="container">
       <div className="content-container">
-        <h1 className="title">Connect with MrxBet</h1>
-        <p className="sub-title">
-          Enter your email associated with Mrxbet to get exclusive real-time
-          updates and promotions just for you!
-        </p>
+        <h1 className="title">{translationsToDisplay.loginTitle}</h1>
+        <p className="sub-title">{translationsToDisplay.loginDescription}</p>
         <div className="input-view">
           <input
             type="email"
@@ -102,7 +154,9 @@ export default function LoginScreen() {
             {loading ? (
               <div className="loader"></div>
             ) : (
-              <span className="button-text">Connect</span>
+              <span className="button-text">
+                {translationsToDisplay.buttonText}
+              </span>
             )}
           </button>
         </div>

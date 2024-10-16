@@ -7,6 +7,8 @@ export const CONTENT_SPACE_ID = "mwgonw73cz4p";
 export const CONTENT_ACCESS_TOKEN =
   "e3HGT0WVnDQHUcvJ6HFmemrEmqi4xdHrbWF-Qlk6_Ic";
 
+export const CONTENT_COLLECTION_NAME_TRANSLATIONS = "translations";
+
 export const CONTENT_API_URL = "https://cdn.contentful.com";
 
 export const CONTENT_COLLECTION_NAME = "promotionList";

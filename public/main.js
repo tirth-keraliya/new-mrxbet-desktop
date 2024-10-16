@@ -16,23 +16,28 @@ const axios = require("axios");
 let mainWindow;
 let tray = null;
 let forceQuit = false;
+let currentLocale = "en-IN";
 
 // Function to create the main app window
 const createWindow = async () => {
   const { default: isDev } = await import("electron-is-dev");
   mainWindow = new BrowserWindow({
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     width: 600,
     height: 788,
     icon: path.join(__dirname, "images", "icon.ico"),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      devTools: false,
+      devTools: true,
       preload: path.join(__dirname, "./preload.js"),
     },
   });
 
+  ipcMain.handle("get-locale", (event) => {
+    console.log(currentLocale, "get-local");
+    return currentLocale;
+  });
   const appUrl = isDev
     ? "http://localhost:3000"
     : `file://${path.join(__dirname, "../build/index.html")}`;

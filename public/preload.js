@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   changeIcon: (iconName) => ipcRenderer.send("change-app-icon", iconName),
   onDeepLink: (callback) =>
     ipcRenderer.on("deep-link", (event, deepLink) => callback(deepLink)),
+  getLocale: () => ipcRenderer.invoke("get-locale"),
 });
 
 contextBridge.exposeInMainWorld("electron", {
@@ -30,7 +31,10 @@ ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_SERVICE_ERROR", (event, token) => {
 });
 
 ipcRenderer.on("PUSH_RECEIVER:::NOTIFICATION_RECEIVED", (_, notification) => {
-  console.log("PUSH_RECEIVER:::NOTIFICATION_RECEIVED", JSON.stringify(notification));
+  console.log(
+    "PUSH_RECEIVER:::NOTIFICATION_RECEIVED",
+    JSON.stringify(notification)
+  );
 
   ipcRenderer.send("send-notification", notification);
 });

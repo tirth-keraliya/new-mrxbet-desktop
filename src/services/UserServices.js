@@ -4,6 +4,7 @@ import {
   CONTENT_ACCESS_TOKEN,
   CONTENT_API_URL,
   CONTENT_COLLECTION_NAME,
+  CONTENT_COLLECTION_NAME_TRANSLATIONS,
   CONTENT_SPACE_ID,
   LEVELS_BY_ICON_NAME,
   PRODUCT_ID,
@@ -122,5 +123,54 @@ export const getContentfulActiveURLS = async () => {
   } catch (error) {
     console.error("Error fetching", error);
     throw error;
+  }
+};
+export const getContentfulTranslation = async (locale) => {
+  try {
+    const response = await fetch(
+      `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/entries?content_type=${CONTENT_COLLECTION_NAME_TRANSLATIONS}&access_token=${CONTENT_ACCESS_TOKEN}&limit=100&locale=${locale}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error fetching translations: ${response.statusText}`);
+    }
+
+    const responseData = await response.json();
+    console.log(responseData, "responseData----ttt");
+
+    // Check if the response data contains items
+
+    // Extract fields data from items
+    const fieldsData = responseData.items.map((item) => item.fields);
+    console.log(fieldsData, "fieldssssssss");
+
+    return fieldsData; // Return the array of fields data
+  } catch (error) {
+    console.error("Error fetching translations", error);
+    return []; // Return an empty array in case of an error
+  }
+};
+export const getContentfulLocation = async () => {
+  try {
+    const response = await fetch(
+      `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/locales?access_token=${CONTENT_ACCESS_TOKEN}&limit=100`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error fetching translations: ${response.statusText}`);
+    }
+
+    const responseData = await response.json();
+    console.log(responseData, "data-test-test");
+
+    // Extract the code from each item
+    const countryCodes = responseData.items.map((item) => item.code);
+
+    console.log(countryCodes, "extracted-codes"); // Log extracted codes
+
+    return countryCodes; // Return the array of codes
+  } catch (error) {
+    console.error("Error fetching translations", error);
+    return []; // Return an empty array in case of an error
   }
 };
