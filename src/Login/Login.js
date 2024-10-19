@@ -1,4 +1,6 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // For navigation
+import { AppScreens } from "../AppNavigation/AppScreens";
 import {
   getContentfulLocation,
   getContentfulTranslation,
@@ -6,10 +8,8 @@ import {
   getPlayerByPlayerID,
 } from "../services/UserServices";
 import { isValidEmail } from "../utils/helper";
-import { useNavigate } from "react-router-dom"; // For navigation
-import "./login.css"; // Import the CSS file
-import { AppScreens } from "../AppNavigation/AppScreens";
 import { getCurrentPlayer } from "../utils/localStorage";
+import "./login.css"; // Import the CSS file
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -36,11 +36,23 @@ export default function LoginScreen() {
   useEffect(() => {
     const fetchLocale = async () => {
       try {
-        const locale = await window.electronAPI.getLocale();
-        console.log(locale, "localll-localll");
-        fetchTranslations(locale); // Fetch translations with the locale
+        let locale = await window.electronAPI.getLocale();
+        console.log(locale, "Fetched Locale");
+
+        // Attempt to load translations for the given locale
+        const translationsLoaded = await fetchTranslations(locale);
+
+        // If translations aren't found, fallback to 'en-US'
+        if (!translationsLoaded) {
+          console.warn(
+            `Locale "${locale}" not found. Falling back to 'en-US'.`
+          );
+          await fetchTranslations("en-US");
+        }
       } catch (error) {
         console.error("Failed to fetch locale:", error);
+        // On error, fallback to 'en-US'
+        await fetchTranslations("en-US");
       }
     };
     fetchLocale();
@@ -49,20 +61,28 @@ export default function LoginScreen() {
   const fetchTranslations = async (locale) => {
     try {
       const data = await getContentfulTranslation(locale);
-      console.log(data, "Fetched Translations Data");
-      setTranslations(data[0] || {}); // Set translations or an empty object if none
+      if (data.length > 0) {
+        console.log(data, "Fetched Translations Data");
+        setTranslations(data[0]); // Set the fetched translations
+        return true; // Indicate that translations were successfully loaded
+      }
+      return false; // Indicate that translations were not found
     } catch (error) {
       console.error("Failed to load translations:", error);
+      return false;
     }
   };
+
   const translationsToDisplay = {
-    buttonText: translations?.buttonText,
-    emailPlaceholder: translations?.emailPlaceholder,
-    emailRequired: translations?.emailRequired,
-    validEmail: translations?.validEmail,
-    loginTitle: translations?.loginTitle,
-    loginDescription: translations?.loginDescription,
-    loginError: translations?.loginError,
+    buttonText: translations?.buttonText || "Login",
+    emailPlaceholder: translations?.emailPlaceholder || "Enter your email",
+    emailRequired: translations?.emailRequired || "Email is required",
+    validEmail: translations?.validEmail || "Please enter a valid email",
+    loginTitle: translations?.loginTitle || "Login",
+    loginDescription:
+      translations?.loginDescription || "Please log in to continue",
+    loginError:
+      translations?.loginError || "Failed to log in. Please try again.",
   };
 
   const checkUserLogin = useCallback(
@@ -129,11 +149,6 @@ export default function LoginScreen() {
     }
   }, [email, navigate]);
 
-  //   const changeIcon = (iconName) => {
-  //     // Send the icon change request to Electron via the ipcRenderer
-  //     window.electronAPI.changeIcon(iconName);
-  //   };
-
   return (
     <div className="container">
       <div className="content-container">
@@ -142,7 +157,7 @@ export default function LoginScreen() {
         <div className="input-view">
           <input
             type="email"
-            placeholder="Enter your email"
+            placeholder={translationsToDisplay.emailPlaceholder}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="input"

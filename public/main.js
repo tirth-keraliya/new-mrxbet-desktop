@@ -33,10 +33,12 @@ const createWindow = async () => {
       preload: path.join(__dirname, "./preload.js"),
     },
   });
+  // Get the system locale.
+  let appLocalize = app.getLocale();
 
   ipcMain.handle("get-locale", (event) => {
-    console.log(currentLocale, "get-local");
-    return currentLocale;
+    console.log(appLocalize, "get-local");
+    return appLocalize;
   });
   const appUrl = isDev
     ? "http://localhost:3000"
