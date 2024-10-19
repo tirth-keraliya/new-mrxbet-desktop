@@ -1,4 +1,3 @@
-import { getCurrentPlayer, setCurrentPlayer } from "../utils/localStorage.js";
 import {
   API_URL,
   CONTENT_ACCESS_TOKEN,
@@ -9,6 +8,7 @@ import {
   LEVELS_BY_ICON_NAME,
   PRODUCT_ID,
 } from "../utils/helper.js";
+import { getCurrentPlayer, setCurrentPlayer } from "../utils/localStorage.js";
 
 // Assuming you have a way to change the favicon or icon in the browser.
 const updateIconBasedOnLevel = async (levelName) => {
@@ -88,11 +88,11 @@ export const getPlayerByPlayerID = async (playerId) => {
 /**
  * @desc Get active URLs from Contentful
  */
-export const getContentfulActiveURLS = async () => {
+export const getContentfulActiveURLS = async (locale) => {
   try {
     let data = false;
     await fetch(
-      `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/entries?content_type=${CONTENT_COLLECTION_NAME}&access_token=${CONTENT_ACCESS_TOKEN}&limit=100`
+      `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/entries?content_type=${CONTENT_COLLECTION_NAME}&access_token=${CONTENT_ACCESS_TOKEN}&limit=100&locale=${locale}`
     )
       .then((res) => res.json())
       .then(async (responseData) => {
