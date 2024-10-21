@@ -1,17 +1,33 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppScreens } from "../AppNavigation/AppScreens";
-import { getCurrentPlayer } from "../utils/localStorage";
-import { getPlayerByPlayerID } from "../services/UserServices";
+import { getCurrentPlayer, setTranslations } from "../utils/localStorage";
+import {
+  getContentfulTranslation,
+  getPlayerByPlayerID,
+} from "../services/UserServices";
 import "./SplashScreen.css";
 
 const SplashScreen = () => {
   const navigate = useNavigate();
 
-  const checkUserLogin = async (fetchedPlayerId) => {
-    let playerId = await getCurrentPlayer();
+  // useEffect(() => {
+  //   const getData = async () => {
+  //     const language = (await window.electronAPI.getLocale()) || "en-US";
+  //     console.log("language--language--main", language);
+  //     const data = await getContentfulTranslation(language);
+  //     setTranslations(data);
+  //   };
+  //   getData();
+  // }, []);
 
-    // If there's an existing player ID, navigate to HomeScreen immediately
+  const checkUserLogin = async (fetchedPlayerId) => {
+    const language = (await window.electronAPI.getLocale()) || "en-US";
+    console.log("language--language--main", language);
+    const data = await getContentfulTranslation(language);
+    setTranslations(data);
+
+    let playerId = await getCurrentPlayer();
     if (playerId) {
       navigate(AppScreens.HomeScreen, { replace: true });
       return;

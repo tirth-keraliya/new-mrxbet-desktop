@@ -5,10 +5,16 @@ import {
   CONTENT_COLLECTION_NAME,
   CONTENT_COLLECTION_NAME_TRANSLATIONS,
   CONTENT_SPACE_ID,
+  defaultTranslation,
   LEVELS_BY_ICON_NAME,
   PRODUCT_ID,
 } from "../utils/helper.js";
-import { getCurrentPlayer, setCurrentPlayer } from "../utils/localStorage.js";
+import {
+  getAppLocale,
+  getCurrentPlayer,
+  setAppLocale,
+  setCurrentPlayer,
+} from "../utils/localStorage.js";
 
 // Assuming you have a way to change the favicon or icon in the browser.
 const updateIconBasedOnLevel = async (levelName) => {
@@ -88,8 +94,9 @@ export const getPlayerByPlayerID = async (playerId) => {
 /**
  * @desc Get active URLs from Contentful
  */
-export const getContentfulActiveURLS = async (locale) => {
+export const getContentfulActiveURLS = async () => {
   try {
+    const locale = getAppLocale() ?? "en-US";
     let data = false;
     await fetch(
       `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/entries?content_type=${CONTENT_COLLECTION_NAME}&access_token=${CONTENT_ACCESS_TOKEN}&limit=100&locale=${locale}`
@@ -125,29 +132,26 @@ export const getContentfulActiveURLS = async (locale) => {
     throw error;
   }
 };
-export const getContentfulTranslation = async (locale) => {
+export const getContentfulTranslation = async (language) => {
   try {
+    const countryCodes = await getContentfulLocation();
+    const locale = countryCodes?.includes(language) ? language : "en-US";
+    setAppLocale(locale);
     const response = await fetch(
       `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/entries?content_type=${CONTENT_COLLECTION_NAME_TRANSLATIONS}&access_token=${CONTENT_ACCESS_TOKEN}&limit=100&locale=${locale}`
     );
-
     if (!response.ok) {
-      throw new Error(`Error fetching translations: ${response.statusText}`);
+      return [defaultTranslation];
     }
-
     const responseData = await response.json();
-    console.log(responseData, "responseData----ttt");
-
-    // Check if the response data contains items
-
-    // Extract fields data from items
+    if (!responseData.items || responseData.items.length === 0) {
+      return [defaultTranslation]; // Return empty array if no items
+    }
     const fieldsData = responseData.items.map((item) => item.fields);
-    console.log(fieldsData, "fieldssssssss");
-
     return fieldsData; // Return the array of fields data
   } catch (error) {
     console.error("Error fetching translations", error);
-    return []; // Return an empty array in case of an error
+    return [defaultTranslation]; // Return an empty array in case of an error
   }
 };
 export const getContentfulLocation = async () => {
@@ -155,22 +159,15 @@ export const getContentfulLocation = async () => {
     const response = await fetch(
       `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/locales?access_token=${CONTENT_ACCESS_TOKEN}&limit=100`
     );
-
     if (!response.ok) {
-      throw new Error(`Error fetching translations: ${response.statusText}`);
+      console.log(`Error fetching translations: ${response.statusText}`);
     }
-
     const responseData = await response.json();
-    console.log(responseData, "data-test-test");
-
-    // Extract the code from each item
     const countryCodes = responseData.items.map((item) => item.code);
-
-    console.log(countryCodes, "extracted-codes"); // Log extracted codes
-
-    return countryCodes; // Return the array of codes
+    console.log(countryCodes, "extracted-codes");
+    return countryCodes;
   } catch (error) {
     console.error("Error fetching translations", error);
-    return []; // Return an empty array in case of an error
+    return ["en-US"];
   }
 };

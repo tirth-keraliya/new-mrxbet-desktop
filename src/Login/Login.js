@@ -8,7 +8,7 @@ import {
   getPlayerByPlayerID,
 } from "../services/UserServices";
 import { isValidEmail } from "../utils/helper";
-import { getCurrentPlayer } from "../utils/localStorage";
+import { getCurrentPlayer, getTranslations } from "../utils/localStorage";
 import "./login.css"; // Import the CSS file
 
 export default function LoginScreen() {
@@ -16,62 +16,15 @@ export default function LoginScreen() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [translations, setTranslations] = useState({});
-  const [countryCodes, setCountryCodes] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCountryCodes = async () => {
-      try {
-        const data = await getContentfulLocation();
-        if (data.length > 0) {
-          setCountryCodes(data);
-        }
-      } catch (error) {
-        console.error("Failed to load country code:", error);
-      }
+    const setTranslation =  () => {
+      const translationss = getTranslations();
+      setTranslations(translationss);
     };
-    fetchCountryCodes();
+    setTranslation();
   }, []);
-
-  useEffect(() => {
-    const fetchLocale = async () => {
-      try {
-        let locale = await window.electronAPI.getLocale();
-        console.log(locale, "Fetched Locale");
-
-        // Attempt to load translations for the given locale
-        const translationsLoaded = await fetchTranslations(locale);
-
-        // If translations aren't found, fallback to 'en-US'
-        if (!translationsLoaded) {
-          console.warn(
-            `Locale "${locale}" not found. Falling back to 'en-US'.`
-          );
-          await fetchTranslations("en-US");
-        }
-      } catch (error) {
-        console.error("Failed to fetch locale:", error);
-        // On error, fallback to 'en-US'
-        await fetchTranslations("en-US");
-      }
-    };
-    fetchLocale();
-  }, []);
-
-  const fetchTranslations = async (locale) => {
-    try {
-      const data = await getContentfulTranslation(locale);
-      if (data.length > 0) {
-        console.log(data, "Fetched Translations Data");
-        setTranslations(data[0]); // Set the fetched translations
-        return true; // Indicate that translations were successfully loaded
-      }
-      return false; // Indicate that translations were not found
-    } catch (error) {
-      console.error("Failed to load translations:", error);
-      return false;
-    }
-  };
 
   const translationsToDisplay = {
     buttonText: translations?.buttonText || "Login",

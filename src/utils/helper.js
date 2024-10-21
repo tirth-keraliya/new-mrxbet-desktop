@@ -29,3 +29,15 @@ export const LEVELS_BY_ICON_NAME = {
   Icon2: "Platinum",
   Icon1: "Silver",
 };
+
+export const defaultTranslation = {
+  loginTitle: "Connect with MrXbet",
+  loginDescription:
+    "Enter your email associated with Mrxbet to get exclusive realtime updates and promotions specially for you!",
+  emailPlaceholder: "Enter your email",
+  buttonText: "Connect",
+  emailRequired: "Email is required",
+  validEmail: "Please enter a valid email",
+  loginError: "Failed to log in. Please try again.",
+  loading: "Loading....",
+};
