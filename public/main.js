@@ -22,14 +22,14 @@ let currentLocale = "en-IN";
 const createWindow = async () => {
   const { default: isDev } = await import("electron-is-dev");
   mainWindow = new BrowserWindow({
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
     width: 600,
     height: 788,
     icon: path.join(__dirname, "images", "icon.ico"),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      devTools: true,
+      devTools: false,
       preload: path.join(__dirname, "./preload.js"),
     },
   });
