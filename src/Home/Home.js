@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AppScreens } from "../AppNavigation/AppScreens";
 import {
   getContentfulActiveURLS,
   getPlayerByEmail,
   getPlayerByPlayerID,
 } from "../services/UserServices";
 import { getCurrentPlayer, getTranslations } from "../utils/localStorage";
-import { useNavigate } from "react-router-dom";
-import { AppScreens } from "../AppNavigation/AppScreens";
 import "./HomeScreen.css"; // Import the CSS file
 
 const HomeScreen = () => {
@@ -64,6 +64,7 @@ const HomeScreen = () => {
                     border: "none",
                     padding: 0,
                     cursor: "pointer",
+                    width: "100%",
                   }}
                 >
                   <div className="imgWrapper">
