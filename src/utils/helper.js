@@ -26,8 +26,13 @@ export function isValidEmail(value) {
   return isValid ? true : false;
 }
 export const LEVELS_BY_ICON_NAME = {
-  Icon2: "Platinum",
-  Icon1: "Silver",
+  Icon1: "Ruby",
+  Icon2: "Silver",
+  Icon3: "Gold",
+  Icon4: "Platinum",
+  Icon5: "Diamond",
+  Icon6: "Black",
+  Icon7: "777",
 };
 
 export const defaultTranslation = {

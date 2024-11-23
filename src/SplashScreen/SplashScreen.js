@@ -13,7 +13,7 @@ const SplashScreen = () => {
 
   // useEffect(() => {
   //   const getData = async () => {
-  //     const language = (await window.electronAPI.getLocale()) || "en-US";
+  //     const language = (await window.electronAPI.getLocale()) || "enUS";
   //     console.log("language--language--main", language);
   //     const data = await getContentfulTranslation(language);
   //     setTranslations(data);
@@ -22,7 +22,7 @@ const SplashScreen = () => {
   // }, []);
 
   const checkUserLogin = async (fetchedPlayerId) => {
-    const language = (await window.electronAPI.getLocale()) || "en-US";
+    const language = (await window.electronAPI.getLocale()) || "enUS";
     console.log("language--language--main", language);
     const data = await getContentfulTranslation(language);
     setTranslations(data);

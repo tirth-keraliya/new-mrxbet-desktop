@@ -38,7 +38,7 @@ const createWindow = async () => {
 
   ipcMain.handle("get-locale", (event) => {
     console.log(appLocalize, "get-local");
-    return appLocalize;
+    return appLocalize.replace("-","");
   });
   const appUrl = isDev
     ? "http://localhost:3000"

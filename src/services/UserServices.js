@@ -12,6 +12,7 @@ import {
 import {
   getAppLocale,
   getCurrentPlayer,
+  setAppLocale,
   setCurrentPlayer,
 } from "../utils/localStorage.js";
 
@@ -31,10 +32,6 @@ const updateIconBasedOnLevel = async (levelName) => {
       case "Black":
         // currentIcon.href = "/public/images/black.ico";
         window.electronAPI.changeIcon("black");
-        break;
-      case "Bronze":
-        // currentIcon.href = "/public/images/bronze.ico";
-        window.electronAPI.changeIcon("bronze");
         break;
       case "Diamond":
         // currentIcon.href = "/public/images/diamond.ico";
@@ -119,7 +116,7 @@ export const getPlayerByPlayerID = async (playerId) => {
 export const getContentfulActiveURLS = async () => {
   try {
     const language = await getAppLocale();
-    const locale = language || "en-US";
+    const locale = language || "enUS";
     const player = await getCurrentPlayer();
 
     const response = await fetch(
@@ -182,7 +179,8 @@ export const getContentfulActiveURLS = async () => {
 export const getContentfulTranslation = async (language) => {
   try {
     // const countryCodes = await getContentfulLocation();
-    const locale = language ?? "en-US";
+    const locale = language ?? "enUS";
+    setAppLocale(locale);
     const response = await fetch(
       `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/entries?content_type=${CONTENT_COLLECTION_NAME_TRANSLATIONS}&access_token=${CONTENT_ACCESS_TOKEN}&limit=100`
     );
@@ -231,6 +229,6 @@ export const getContentfulLocation = async () => {
     return countryCodes;
   } catch (error) {
     console.error("Error fetching translations", error);
-    return ["en-US"];
+    return ["enUS"];
   }
 };
