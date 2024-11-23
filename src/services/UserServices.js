@@ -12,7 +12,6 @@ import {
 import {
   getAppLocale,
   getCurrentPlayer,
-  setAppLocale,
   setCurrentPlayer,
 } from "../utils/localStorage.js";
 
@@ -25,13 +24,36 @@ const updateIconBasedOnLevel = async (levelName) => {
     if (LEVELS_BY_ICON_NAME[currentIconHref] === levelName) return;
 
     switch (levelName) {
+      case "777":
+        // currentIcon.href = "/public/images/777.ico";
+        window.electronAPI.changeIcon("777");
+        break;
+      case "Black":
+        // currentIcon.href = "/public/images/black.ico";
+        window.electronAPI.changeIcon("black");
+        break;
+      case "Bronze":
+        // currentIcon.href = "/public/images/bronze.ico";
+        window.electronAPI.changeIcon("bronze");
+        break;
+      case "Diamond":
+        // currentIcon.href = "/public/images/diamond.ico";
+        window.electronAPI.changeIcon("diamond");
+        break;
+      case "Gold":
+        // currentIcon.href = "/public/images/gold.ico";
+        window.electronAPI.changeIcon("gold");
+        break;
       case "Platinum":
         // currentIcon.href = "/public/images/platinum.ico";
         window.electronAPI.changeIcon("platinum");
         break;
+      case "Ruby":
+        // currentIcon.href = "/public/images/ruby.ico";
+        window.electronAPI.changeIcon("ruby");
       case "Silver":
-        // currentIcon.href = "/public/images/bronze.ico";
-        window.electronAPI.changeIcon("bronze");
+        // currentIcon.href = "/public/images/silver.ico";
+        window.electronAPI.changeIcon("silver");
         break;
       default:
         break;
@@ -96,59 +118,100 @@ export const getPlayerByPlayerID = async (playerId) => {
  */
 export const getContentfulActiveURLS = async () => {
   try {
-    const locale = getAppLocale() ?? "en-US";
-    let data = false;
-    await fetch(
-      `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/entries?content_type=${CONTENT_COLLECTION_NAME}&access_token=${CONTENT_ACCESS_TOKEN}&limit=100&locale=${locale}`
-    )
-      .then((res) => res.json())
-      .then(async (responseData) => {
-        let player = await getCurrentPlayer();
-        if (responseData?.sys?.type === "Error") {
-          data = false;
-        } else {
-          const items = await responseData?.items?.filter((item) =>
-            item?.fields?.level?.includes(player?.levelName)
-          );
-          const newData = await items?.map((item) => {
-            const imageData = responseData?.includes?.Asset?.find(
-              (asset) => asset?.sys?.id === item?.fields?.image?.sys?.id
-            );
+    const language = await getAppLocale();
+    const locale = language || "en-US";
+    const player = await getCurrentPlayer();
 
-            let image = `https:${imageData?.fields?.file?.url}`;
+    const response = await fetch(
+      `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/entries?content_type=${CONTENT_COLLECTION_NAME}&access_token=${CONTENT_ACCESS_TOKEN}&limit=100`
+    );
 
-            return { ...item?.fields, image };
-          });
+    if (!response.ok) {
+      console.error("Error fetching Contentful data:", response.statusText);
+      return false;
+    }
 
-          data = newData;
+    const responseData = await response.json();
+
+    if (responseData?.sys?.type === "Error") {
+      return false;
+    }
+
+    // Filter items based on player level
+    const items = responseData?.items?.filter((item) =>
+      item?.fields?.level?.includes(player?.levelName)
+    );
+
+    // Map items to include image URLs and clean up localized fields
+    const newData = items?.map((item) => {
+      const fields = item?.fields || {};
+      const transformedFields = {};
+
+      // Handle localization and cleanup
+      Object.keys(fields).forEach((key) => {
+        if (key.endsWith(`00${locale}`)) {
+          // Localized field: strip "00<locale>" suffix
+          const baseKey = key.replace(`00${locale}`, "");
+          transformedFields[baseKey] = fields[key];
+        } else if (
+          !Object.keys(fields).some(
+            (localizedKey) => localizedKey === `${key}00${locale}`
+          )
+        ) {
+          // Add default field only if no localized version exists
+          transformedFields[key] = fields[key];
         }
-      })
-      .catch((err) => {
-        console.log("err", err);
       });
-    return data;
+
+      // Attach image data
+      const imageData = responseData?.includes?.Asset?.find(
+        (asset) => asset?.sys?.id === transformedFields?.image?.sys?.id
+      );
+
+      const image = imageData ? `https:${imageData?.fields?.file?.url}` : null;
+
+      return { ...transformedFields, image };
+    });
+
+    return newData || false;
   } catch (error) {
-    console.error("Error fetching", error);
-    throw error;
+    console.error("Error fetching Contentful Active URLs:", error);
+    return false;
   }
 };
 export const getContentfulTranslation = async (language) => {
   try {
-    const countryCodes = await getContentfulLocation();
-    const locale = countryCodes?.includes(language) ? language : "en-US";
-    setAppLocale(locale);
+    // const countryCodes = await getContentfulLocation();
+    const locale = language ?? "en-US";
     const response = await fetch(
-      `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/entries?content_type=${CONTENT_COLLECTION_NAME_TRANSLATIONS}&access_token=${CONTENT_ACCESS_TOKEN}&limit=100&locale=${locale}`
+      `${CONTENT_API_URL}/spaces/${CONTENT_SPACE_ID}/environments/master/entries?content_type=${CONTENT_COLLECTION_NAME_TRANSLATIONS}&access_token=${CONTENT_ACCESS_TOKEN}&limit=100`
     );
     if (!response.ok) {
       return [defaultTranslation];
     }
     const responseData = await response.json();
     if (!responseData.items || responseData.items.length === 0) {
-      return [defaultTranslation]; // Return empty array if no items
+      return [defaultTranslation]; // Return default translation if no items
     }
-    const fieldsData = responseData.items.map((item) => item.fields);
-    return fieldsData; // Return the array of fields data
+
+    const fieldsData = responseData.items.map((item) => {
+      const fields = item.fields;
+      const transformedFields = {};
+
+      Object.keys(fields).forEach((key) => {
+        const localeKey = `${key}00${locale}`;
+        if (fields[localeKey] !== undefined) {
+          // If locale-specific field exists, use it
+          transformedFields[key] = fields[localeKey];
+        } else {
+          // Otherwise, fallback to the main field
+          transformedFields[key] = fields[key];
+        }
+      });
+
+      return transformedFields;
+    });
+    return fieldsData; // Return the array of transformed fields
   } catch (error) {
     console.error("Error fetching translations", error);
     return [defaultTranslation]; // Return an empty array in case of an error
